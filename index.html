@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>末日垃圾场</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui">
+        <div id="progressBar">
+            <div id="progressFill"></div>
+        </div>
+        <div id="progressText">进度: 0%</div>
+        
+        <div id="healthBar">
+            <div id="healthFill"></div>
+        </div>
+        
+        <div id="enemyCounter">
+                <div id="enemyCountText">剩余: 0</div>
+        </div>
+        
+        <div id="skillButtons">
+            <button class="skill-btn" id="skill1">
+                <div>磁暴弹</div>
+                <div style="font-size: 10px;">8s</div>
+            </button>
+            <button class="skill-btn" id="skill2">
+                <div>废钢护盾</div>
+                <div style="font-size: 10px;">10s</div>
+            </button>
+        </div>
+        
+        <div id="instructions">
+            操作说明：<br>
+            • 左右滑动屏幕移动<br>
+            • 自动射击<br>
+            • 点击技能按钮释放技能<br>
+            <div id="playerPosition">
+                <div>主角位置：</div>
+                <div>X: <span id="playerX">0</span></div>
+                <div>Y: <span id="playerY">0</span></div>
+            </div>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+    
+    <!-- 开始游戏界面 -->
+    <div id="startScreen">
+        <div class="start-content">
+            <h1>末日垃圾场</h1>
+            <div class="game-description">
+                <p>在末日废土中驾驶飞船，消灭敌人，避开障碍物！</p>
+            </div>
+            <div class="controls-info">
+                <h3>操作说明</h3>
+                <div class="control-item">
+                    <span class="control-key">A/D 键</span>
+                    <span class="control-desc">左右移动</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">触摸滑动</span>
+                    <span class="control-desc">移动端操作</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">自动射击</span>
+                    <span class="control-desc">无需操作</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">J 键</span>
+                    <span class="control-desc">磁暴弹技能</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">K 键</span>
+                    <span class="control-desc">废钢护盾技能</span>
+                </div>
+                <div class="control-item">
+                    <span class="control-key">技能按钮</span>
+                    <span class="control-desc">点击释放技能</span>
+                </div>
+            </div>
+            <button id="startBtn" class="start-btn">开始游戏</button>
+        </div>
+    </div>
+
+    <!-- 游戏结束界面 -->
+    <div id="gameOverScreen">
+        <h1 id="gameOverTitle">游戏结束</h1>
+        <p id="gameOverMessage"></p>
+        <button id="restartBtn">重新开始</button>
+    </div>
+
+    <!-- 游戏脚本文件 -->
+    <script src="config.js"></script>
+    <script src="levelConfig.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+    
+    <!-- 游戏启动脚本 -->
+    <script>
+        // 游戏实例
+        let game;
+        
+        // 页面加载完成后初始化游戏
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('gameCanvas');
+            game = new GameEngine(canvas);
+            // 显示开始界面，不自动开始游戏
+        });
+    </script>
+</body>
+</html>

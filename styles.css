@@ -1,0 +1,374 @@
+/* 末日垃圾场游戏样式 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #000;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+#gameCanvas {
+    display: block;
+    background: linear-gradient(to bottom, #1a1a2e, #16213e, #0f3460);
+    cursor: none;
+}
+
+#ui {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#progressBar {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#progressFill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000);
+    width: 0%;
+    transition: width 0.1s ease;
+}
+
+#progressText {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 18px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+#healthBar {
+    position: absolute;
+    bottom: 120px;
+    left: 20px;
+    width: 200px;
+    height: 20px;
+    background: rgba(255, 0, 0, 0.3);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#enemyCounter {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #fff;
+    border-radius: 10px;
+    padding: 10px 15px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    min-width: 100px;
+}
+
+#enemyCountText {
+    color: #ff6600;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+#healthFill {
+    height: 100%;
+    background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+    width: 100%;
+    transition: width 0.1s ease;
+}
+
+#skillButtons {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 20px;
+    pointer-events: auto;
+}
+
+.skill-btn {
+    width: 80px;
+    height: 80px;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: rgba(0, 100, 255, 0.7);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.skill-btn:hover {
+    background: rgba(0, 150, 255, 0.9);
+    transform: scale(1.1);
+}
+
+.skill-btn:disabled {
+    background: rgba(100, 100, 100, 0.5);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.skill-cooldown {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#gameOverScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 20;
+}
+
+#gameOverScreen h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+#gameOverScreen p {
+    font-size: 24px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+#restartBtn {
+    padding: 15px 30px;
+    font-size: 20px;
+    background: #00ff00;
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+#restartBtn:hover {
+    background: #00cc00;
+    transform: scale(1.05);
+}
+
+#instructions {
+    position: absolute;
+    top: 100px;
+    left: 20px;
+    color: white;
+    font-size: 14px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    line-height: 1.5;
+}
+
+#playerPosition {
+    margin-top: 10px;
+    padding: 8px;
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid rgba(0, 255, 0, 0.3);
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+}
+
+#playerPosition div {
+    margin: 2px 0;
+}
+
+#playerPosition span {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+#debugInfo {
+    margin-top: 10px;
+    font-size: 12px;
+    color: #ffff00;
+}
+
+/* 开始游戏界面样式 */
+#startScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 30;
+}
+
+.start-content {
+    text-align: center;
+    max-width: 500px;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+}
+
+.start-content h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    background: linear-gradient(45deg, #00ff00, #00ffff, #ff00ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.game-description {
+    margin-bottom: 30px;
+}
+
+.game-description p {
+    font-size: 18px;
+    color: #cccccc;
+    line-height: 1.6;
+}
+
+.controls-info {
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.controls-info h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #00ffff;
+    text-align: center;
+}
+
+.control-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.control-key {
+    background: rgba(0, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: #00ffff;
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    min-width: 100px;
+    text-align: center;
+}
+
+.control-desc {
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.start-btn {
+    padding: 15px 40px;
+    font-size: 24px;
+    background: linear-gradient(45deg, #00ff00, #00cc00);
+    color: #000;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.start-btn:hover {
+    background: linear-gradient(45deg, #00cc00, #00ff00);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 255, 0, 0.4);
+}
+
+.start-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(0, 255, 0, 0.3);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .start-content {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    .start-content h1 {
+        font-size: 36px;
+    }
+    
+    .game-description p {
+        font-size: 16px;
+    }
+    
+    .controls-info h3 {
+        font-size: 20px;
+    }
+    
+    .control-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .control-key {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .start-btn {
+        font-size: 20px;
+        padding: 12px 30px;
+    }
+}
