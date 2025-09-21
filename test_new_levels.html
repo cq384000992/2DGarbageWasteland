@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新关卡设计测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .level-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .level-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #4ecdc4;
+        }
+        
+        .level-card h3 {
+            color: #4ecdc4;
+            margin-top: 0;
+        }
+        
+        .monster-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .monster-stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .monster-stat h4 {
+            margin: 0 0 5px 0;
+            color: #ffd700;
+        }
+        
+        .monster-stat .count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+        
+        .rules-section {
+            background: rgba(78, 205, 196, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #4ecdc4;
+            margin: 15px 0;
+        }
+        
+        .rules-section h4 {
+            color: #4ecdc4;
+            margin-top: 0;
+        }
+        
+        .rules-list {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .rules-list li {
+            margin: 5px 0;
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>新关卡设计测试</h1>
+        
+        <div class="test-section">
+            <h2>新生成规则</h2>
+            <div class="rules-section">
+                <h4>怪物生成规则</h4>
+                <ul class="rules-list">
+                    <li><strong>油桶怪 + 飞碟怪</strong>：同一排最多可以有3个（包括混搭）</li>
+                    <li><strong>巨型近战怪</strong>：出现时，同一排数量最多有2个，可以和其他混搭</li>
+                    <li><strong>怪物数量</strong>：相比原先增加50%</li>
+                    <li><strong>后半段密度</strong>：后半段的怪物数量显著增加</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>关卡对比</h2>
+            <div class="level-comparison">
+                <div class="level-card">
+                    <h3>第一关 - 简单</h3>
+                    <div class="monster-stats">
+                        <div class="monster-stat">
+                            <h4>油桶怪</h4>
+                            <div class="count">45</div>
+                            <div style="font-size: 12px; color: #888;">(原30)</div>
+                        </div>
+                        <div class="monster-stat">
+                            <h4>飞碟怪</h4>
+                            <div class="count">24</div>
+                            <div style="font-size: 12px; color: #888;">(原16)</div>
+                        </div>
+                        <div class="monster-stat">
+                            <h4>巨型怪</h4>
+                            <div class="count">9</div>
+                            <div style="font-size: 12px; color: #888;">(原6)</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+                    <div style="text-align: center; font-size: 18px; font-weight: bold; color: #4ecdc4;">
+                        总计: 78个怪物 (原52)
+                    </div>
+                </div>
+                
+                <div class="level-card">
+                    <h3>第二关 - 中等</h3>
+                    <div class="monster-stats">
+                        <div class="monster-stat">
+                            <h4>油桶怪</h4>
+                            <div class="count">75</div>
+                            <div style="font-size: 12px; color: #888;">(原50)</div>
+                        </div>
+                        <div class="monster-stat">
+                            <h4>飞碟怪</h4>
+                            <div class="count">45</div>
+                            <div style="font-size: 12px; color: #888;">(原30)</div>
+                        </div>
+                        <div class="monster-stat">
+                            <h4>巨型怪</h4>
+                            <div class="count">24</div>
+                            <div style="font-size: 12px; color: #888;">(原16)</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+                    <div style="text-align: center; font-size: 18px; font-weight: bold; color: #4ecdc4;">
+                        总计: 144个怪物 (原96)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>密度分布</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="text-align: center;">
+                    <h4 style="color: #4ecdc4;">前期 20%</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 30%;"></div>
+                    </div>
+                    <div style="font-size: 12px;">密度: 0.3-0.7</div>
+                </div>
+                <div style="text-align: center;">
+                    <h4 style="color: #4ecdc4;">中段 30%</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 60%;"></div>
+                    </div>
+                    <div style="font-size: 12px;">密度: 0.7-1.5</div>
+                </div>
+                <div style="text-align: center;">
+                    <h4 style="color: #4ecdc4;">后期 30%</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%;"></div>
+                    </div>
+                    <div style="font-size: 12px;">密度: 1.5-2.3</div>
+                </div>
+                <div style="text-align: center;">
+                    <h4 style="color: #4ecdc4;">最后 20%</h4>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%;"></div>
+                    </div>
+                    <div style="font-size: 12px;">密度: 2.3-3.0</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试控制</h2>
+            <button onclick="checkLevelConfig()">检查关卡配置</button>
+            <button onclick="testSpawnRules()">测试生成规则</button>
+            <button onclick="simulateLevel()">模拟关卡生成</button>
+            <button onclick="startGameTest()">启动游戏测试</button>
+            <button onclick="clearLog()">清除日志</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏测试</h2>
+            <div id="gameContainer" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        class NewLevelTest {
+            constructor() {
+                this.logs = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('新关卡设计测试系统初始化完成');
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            checkLevelConfig() {
+                this.log('=== 关卡配置检查 ===');
+                
+                try {
+                    if (typeof CONFIG !== 'undefined') {
+                        const levels = CONFIG.LEVELS;
+                        
+                        for (let i = 0; i < levels.length; i++) {
+                            const level = levels[i];
+                            this.log(`关卡 ${i + 1} (${level.DIFFICULTY}):`);
+                            this.log(`  持续时间: ${level.DURATION / 1000}秒`);
+                            this.log(`  油桶怪: ${level.MAX_BARREL_MONSTERS}个`);
+                            this.log(`  飞碟怪: ${level.MAX_UFO_TURRETS}个`);
+                            this.log(`  巨型怪: ${level.MAX_GIANT_MELEES}个`);
+                            this.log(`  总计: ${level.TOTAL_MONSTERS}个`);
+                            this.log(`  描述: ${level.DESCRIPTION}`);
+                        }
+                        
+                        this.log('关卡配置检查完成');
+                    } else {
+                        this.log('CONFIG未定义，请确保config.js已加载');
+                    }
+                } catch (error) {
+                    this.log('关卡配置检查失败: ' + error.message);
+                }
+            }
+            
+            testSpawnRules() {
+                this.log('=== 生成规则测试 ===');
+                
+                try {
+                    // 模拟不同情况下的生成规则
+                    const testCases = [
+                        { name: '空行', currentRowEnemies: [], hasGiant: false },
+                        { name: '1个油桶怪', currentRowEnemies: [{ type: 'barrel' }], hasGiant: false },
+                        { name: '2个飞碟怪', currentRowEnemies: [{ type: 'ufo' }, { type: 'ufo' }], hasGiant: false },
+                        { name: '1个巨型怪', currentRowEnemies: [{ type: 'giant' }], hasGiant: true },
+                        { name: '1个巨型怪+1个油桶怪', currentRowEnemies: [{ type: 'giant' }, { type: 'barrel' }], hasGiant: true },
+                    ];
+                    
+                    testCases.forEach(testCase => {
+                        const maxEnemiesPerRow = testCase.hasGiant ? 2 : 3;
+                        const canAddMore = testCase.currentRowEnemies.length < maxEnemiesPerRow;
+                        
+                        this.log(`${testCase.name}: 最大${maxEnemiesPerRow}个, 当前${testCase.currentRowEnemies.length}个, 可添加: ${canAddMore ? '是' : '否'}`);
+                    });
+                    
+                    this.log('生成规则测试完成');
+                } catch (error) {
+                    this.log('生成规则测试失败: ' + error.message);
+                }
+            }
+            
+            simulateLevel() {
+                this.log('=== 关卡生成模拟 ===');
+                
+                try {
+                    if (typeof CONFIG !== 'undefined') {
+                        const level = CONFIG.LEVELS[0]; // 测试第一关
+                        this.log(`模拟关卡1生成 (${level.DIFFICULTY})`);
+                        
+                        // 模拟密度分布
+                        const progressStages = [
+                            { name: '前期20%', ratio: 0.1, expectedDensity: 0.5 },
+                            { name: '中段30%', ratio: 0.4, expectedDensity: 1.1 },
+                            { name: '后期30%', ratio: 0.65, expectedDensity: 1.9 },
+                            { name: '最后20%', ratio: 0.9, expectedDensity: 2.8 }
+                        ];
+                        
+                        progressStages.forEach(stage => {
+                            this.log(`${stage.name} (进度${Math.floor(stage.ratio * 100)}%): 预期密度 ${stage.expectedDensity}`);
+                        });
+                        
+                        this.log(`总怪物数: ${level.TOTAL_MONSTERS}个`);
+                        this.log('关卡生成模拟完成');
+                    } else {
+                        this.log('CONFIG未定义，无法进行模拟');
+                    }
+                } catch (error) {
+                    this.log('关卡生成模拟失败: ' + error.message);
+                }
+            }
+            
+            startGameTest() {
+                this.log('启动游戏测试...');
+                
+                try {
+                    const gameContainer = document.getElementById('gameContainer');
+                    if (gameContainer) {
+                        // 创建iframe加载游戏
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'index.html';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '600px';
+                        iframe.style.border = '2px solid #4ecdc4';
+                        iframe.style.borderRadius = '10px';
+                        
+                        iframe.onload = () => {
+                            this.log('游戏页面加载完成');
+                        };
+                        
+                        iframe.onerror = () => {
+                            this.log('游戏页面加载失败');
+                        };
+                        
+                        gameContainer.innerHTML = '';
+                        gameContainer.appendChild(iframe);
+                        
+                        this.log('游戏iframe已创建');
+                    }
+                } catch (error) {
+                    this.log('启动游戏失败: ' + error.message);
+                }
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清除');
+            }
+        }
+        
+        // 全局变量
+        let newLevelTest = null;
+        
+        // 全局函数
+        function checkLevelConfig() {
+            if (newLevelTest) {
+                newLevelTest.checkLevelConfig();
+            }
+        }
+        
+        function testSpawnRules() {
+            if (newLevelTest) {
+                newLevelTest.testSpawnRules();
+            }
+        }
+        
+        function simulateLevel() {
+            if (newLevelTest) {
+                newLevelTest.simulateLevel();
+            }
+        }
+        
+        function startGameTest() {
+            if (newLevelTest) {
+                newLevelTest.startGameTest();
+            }
+        }
+        
+        function clearLog() {
+            if (newLevelTest) {
+                newLevelTest.clearLog();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            newLevelTest = new NewLevelTest();
+        });
+        
+        // 捕获全局错误
+        window.addEventListener('error', (event) => {
+            console.error('全局错误:', event.error);
+            if (newLevelTest) {
+                newLevelTest.log('全局错误: ' + event.error.message);
+            }
+        });
+    </script>
+    
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>

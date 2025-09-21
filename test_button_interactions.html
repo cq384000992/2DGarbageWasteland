@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按钮交互测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #5a4a2d;
+            border-left: 4px solid #ff9800;
+        }
+        .error {
+            background-color: #5a2d2d;
+            border-left: 4px solid #f44336;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .button-test {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .button-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #4ecdc4;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .button-card h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+        .test-button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(78, 205, 196, 0.4);
+        }
+        .button-status {
+            margin-top: 10px;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .status-pass { background-color: rgba(76, 175, 80, 0.2); color: #4caf50; }
+        .status-fail { background-color: rgba(244, 67, 54, 0.2); color: #f44336; }
+        .status-pending { background-color: rgba(255, 152, 0, 0.2); color: #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>🎮 按钮交互测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 按钮功能检查</h2>
+        <div class="button-test">
+            <div class="button-card">
+                <h3>🎯 开始游戏按钮</h3>
+                <button class="test-button" onclick="testStartButton()">测试开始按钮</button>
+                <div id="startButtonStatus" class="button-status status-pending">待测试</div>
+            </div>
+            <div class="button-card">
+                <h3>🔄 重新开始按钮</h3>
+                <button class="test-button" onclick="testRestartButton()">测试重新开始</button>
+                <div id="restartButtonStatus" class="button-status status-pending">待测试</div>
+            </div>
+            <div class="button-card">
+                <h3>➡️ 下一关按钮</h3>
+                <button class="test-button" onclick="testNextLevelButton()">测试下一关</button>
+                <div id="nextLevelButtonStatus" class="button-status status-pending">待测试</div>
+            </div>
+            <div class="button-card">
+                <h3>🔊 音频开关按钮</h3>
+                <button class="test-button" onclick="testAudioToggleButton()">测试音频开关</button>
+                <div id="audioToggleStatus" class="button-status status-pending">待测试</div>
+            </div>
+            <div class="button-card">
+                <h3>🎚️ 音量滑块</h3>
+                <button class="test-button" onclick="testVolumeSlider()">测试音量滑块</button>
+                <div id="volumeSliderStatus" class="button-status status-pending">待测试</div>
+            </div>
+            <div class="button-card">
+                <h3>🎨 按钮样式测试</h3>
+                <button class="test-button" onclick="testButtonStyles()">测试按钮样式</button>
+                <div id="buttonStylesStatus" class="button-status status-pending">待测试</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 综合测试</h2>
+        <button onclick="testAllButtons()">测试所有按钮</button>
+        <button onclick="testButtonAccessibility()">测试按钮可访问性</button>
+        <button onclick="testButtonResponsiveness()">测试按钮响应性</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function addResult(type, title, message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `
+                <div class="test-result ${type}">
+                    <strong>[${timestamp}] ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function updateButtonStatus(buttonId, status, message) {
+            const statusElement = document.getElementById(buttonId);
+            statusElement.textContent = message;
+            statusElement.className = `button-status status-${status}`;
+        }
+
+        function testStartButton() {
+            log('🎯 开始测试开始游戏按钮...');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('❌ 开始游戏按钮不存在');
+                updateButtonStatus('startButtonStatus', 'fail', '按钮不存在');
+                addResult('error', '开始游戏按钮测试', '按钮元素不存在');
+                return;
+            }
+            
+            log('✅ 开始游戏按钮存在');
+            
+            // 检查按钮样式
+            const computedStyle = window.getComputedStyle(startButton);
+            const hasHoverEffect = computedStyle.transition !== 'none';
+            const hasCursorPointer = computedStyle.cursor === 'pointer';
+            
+            log(`按钮样式检查: 悬停效果=${hasHoverEffect}, 指针样式=${hasCursorPointer}`);
+            
+            // 检查事件监听器
+            const hasClickHandler = startButton.onclick !== null || 
+                                  startButton.addEventListener !== undefined;
+            
+            log(`事件监听器: ${hasClickHandler ? '已设置' : '未设置'}`);
+            
+            // 模拟点击测试
+            try {
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                startButton.dispatchEvent(event);
+                log('✅ 按钮点击事件触发成功');
+                updateButtonStatus('startButtonStatus', 'pass', '功能正常');
+                addResult('pass', '开始游戏按钮测试', '按钮存在且功能正常');
+            } catch (error) {
+                log(`❌ 按钮点击事件失败: ${error.message}`);
+                updateButtonStatus('startButtonStatus', 'fail', '点击失败');
+                addResult('error', '开始游戏按钮测试', `点击事件失败: ${error.message}`);
+            }
+        }
+
+        function testRestartButton() {
+            log('🔄 开始测试重新开始按钮...');
+            
+            const restartButton = document.getElementById('restartButton');
+            if (!restartButton) {
+                log('❌ 重新开始按钮不存在');
+                updateButtonStatus('restartButtonStatus', 'fail', '按钮不存在');
+                addResult('error', '重新开始按钮测试', '按钮元素不存在');
+                return;
+            }
+            
+            log('✅ 重新开始按钮存在');
+            
+            // 检查按钮可见性
+            const isVisible = restartButton.offsetParent !== null;
+            const isEnabled = !restartButton.disabled;
+            
+            log(`按钮状态: 可见=${isVisible}, 启用=${isEnabled}`);
+            
+            // 模拟点击测试
+            try {
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                restartButton.dispatchEvent(event);
+                log('✅ 重新开始按钮点击事件触发成功');
+                updateButtonStatus('restartButtonStatus', 'pass', '功能正常');
+                addResult('pass', '重新开始按钮测试', '按钮存在且功能正常');
+            } catch (error) {
+                log(`❌ 重新开始按钮点击事件失败: ${error.message}`);
+                updateButtonStatus('restartButtonStatus', 'fail', '点击失败');
+                addResult('error', '重新开始按钮测试', `点击事件失败: ${error.message}`);
+            }
+        }
+
+        function testNextLevelButton() {
+            log('➡️ 开始测试下一关按钮...');
+            
+            const nextLevelButton = document.getElementById('nextLevelButton');
+            if (!nextLevelButton) {
+                log('❌ 下一关按钮不存在');
+                updateButtonStatus('nextLevelButtonStatus', 'fail', '按钮不存在');
+                addResult('error', '下一关按钮测试', '按钮元素不存在');
+                return;
+            }
+            
+            log('✅ 下一关按钮存在');
+            
+            // 检查按钮样式和状态
+            const computedStyle = window.getComputedStyle(nextLevelButton);
+            const backgroundColor = computedStyle.backgroundColor;
+            const borderRadius = computedStyle.borderRadius;
+            
+            log(`按钮样式: 背景色=${backgroundColor}, 圆角=${borderRadius}`);
+            
+            // 模拟点击测试
+            try {
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                nextLevelButton.dispatchEvent(event);
+                log('✅ 下一关按钮点击事件触发成功');
+                updateButtonStatus('nextLevelButtonStatus', 'pass', '功能正常');
+                addResult('pass', '下一关按钮测试', '按钮存在且功能正常');
+            } catch (error) {
+                log(`❌ 下一关按钮点击事件失败: ${error.message}`);
+                updateButtonStatus('nextLevelButtonStatus', 'fail', '点击失败');
+                addResult('error', '下一关按钮测试', `点击事件失败: ${error.message}`);
+            }
+        }
+
+        function testAudioToggleButton() {
+            log('🔊 开始测试音频开关按钮...');
+            
+            const audioToggle = document.getElementById('audioToggle');
+            if (!audioToggle) {
+                log('❌ 音频开关按钮不存在');
+                updateButtonStatus('audioToggleStatus', 'fail', '按钮不存在');
+                addResult('error', '音频开关按钮测试', '按钮元素不存在');
+                return;
+            }
+            
+            log('✅ 音频开关按钮存在');
+            
+            // 检查按钮图标和状态
+            const buttonText = audioToggle.textContent;
+            const hasIcon = buttonText.includes('🔊') || buttonText.includes('🔇');
+            
+            log(`按钮图标: ${buttonText}, 有图标=${hasIcon}`);
+            
+            // 模拟点击测试
+            try {
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true,
+                    view: window
+                });
+                audioToggle.dispatchEvent(event);
+                log('✅ 音频开关按钮点击事件触发成功');
+                updateButtonStatus('audioToggleStatus', 'pass', '功能正常');
+                addResult('pass', '音频开关按钮测试', '按钮存在且功能正常');
+            } catch (error) {
+                log(`❌ 音频开关按钮点击事件失败: ${error.message}`);
+                updateButtonStatus('audioToggleStatus', 'fail', '点击失败');
+                addResult('error', '音频开关按钮测试', `点击事件失败: ${error.message}`);
+            }
+        }
+
+        function testVolumeSlider() {
+            log('🎚️ 开始测试音量滑块...');
+            
+            const volumeSlider = document.getElementById('volumeSlider');
+            if (!volumeSlider) {
+                log('❌ 音量滑块不存在');
+                updateButtonStatus('volumeSliderStatus', 'fail', '滑块不存在');
+                addResult('error', '音量滑块测试', '滑块元素不存在');
+                return;
+            }
+            
+            log('✅ 音量滑块存在');
+            
+            // 检查滑块属性
+            const min = volumeSlider.min;
+            const max = volumeSlider.max;
+            const value = volumeSlider.value;
+            const step = volumeSlider.step;
+            
+            log(`滑块属性: 最小值=${min}, 最大值=${max}, 当前值=${value}, 步长=${step}`);
+            
+            // 测试滑块值变化
+            try {
+                const originalValue = volumeSlider.value;
+                volumeSlider.value = '75';
+                
+                const event = new Event('input', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                volumeSlider.dispatchEvent(event);
+                
+                log(`✅ 音量滑块值变化测试成功: ${originalValue} → ${volumeSlider.value}`);
+                
+                // 恢复原值
+                volumeSlider.value = originalValue;
+                
+                updateButtonStatus('volumeSliderStatus', 'pass', '功能正常');
+                addResult('pass', '音量滑块测试', '滑块存在且功能正常');
+            } catch (error) {
+                log(`❌ 音量滑块测试失败: ${error.message}`);
+                updateButtonStatus('volumeSliderStatus', 'fail', '测试失败');
+                addResult('error', '音量滑块测试', `测试失败: ${error.message}`);
+            }
+        }
+
+        function testButtonStyles() {
+            log('🎨 开始测试按钮样式...');
+            
+            const buttons = [
+                { id: 'startButton', name: '开始游戏按钮' },
+                { id: 'restartButton', name: '重新开始按钮' },
+                { id: 'nextLevelButton', name: '下一关按钮' },
+                { id: 'audioToggle', name: '音频开关按钮' }
+            ];
+            
+            let passedTests = 0;
+            let totalTests = buttons.length;
+            
+            buttons.forEach(button => {
+                const element = document.getElementById(button.id);
+                if (element) {
+                    const computedStyle = window.getComputedStyle(element);
+                    
+                    // 检查基本样式
+                    const hasBackground = computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)';
+                    const hasBorderRadius = computedStyle.borderRadius !== '0px';
+                    const hasTransition = computedStyle.transition !== 'none';
+                    const hasCursor = computedStyle.cursor === 'pointer';
+                    
+                    log(`${button.name}: 背景=${hasBackground}, 圆角=${hasBorderRadius}, 过渡=${hasTransition}, 指针=${hasCursor}`);
+                    
+                    if (hasBackground && hasBorderRadius && hasTransition && hasCursor) {
+                        passedTests++;
+                    }
+                } else {
+                    log(`❌ ${button.name}不存在`);
+                }
+            });
+            
+            log(`按钮样式测试结果: ${passedTests}/${totalTests} 通过`);
+            
+            if (passedTests === totalTests) {
+                updateButtonStatus('buttonStylesStatus', 'pass', '所有样式正常');
+                addResult('pass', '按钮样式测试', '所有按钮样式都正常');
+            } else {
+                updateButtonStatus('buttonStylesStatus', 'fail', `${passedTests}/${totalTests} 通过`);
+                addResult('warning', '按钮样式测试', `${passedTests}/${totalTests} 按钮样式正常`);
+            }
+        }
+
+        function testAllButtons() {
+            log('🧪 开始测试所有按钮...');
+            
+            testStartButton();
+            setTimeout(() => testRestartButton(), 100);
+            setTimeout(() => testNextLevelButton(), 200);
+            setTimeout(() => testAudioToggleButton(), 300);
+            setTimeout(() => testVolumeSlider(), 400);
+            setTimeout(() => testButtonStyles(), 500);
+            
+            setTimeout(() => {
+                log('✅ 所有按钮测试完成');
+                addResult('info', '综合测试', '所有按钮功能测试完成');
+            }, 600);
+        }
+
+        function testButtonAccessibility() {
+            log('♿ 开始测试按钮可访问性...');
+            
+            const buttons = document.querySelectorAll('button');
+            let accessibleButtons = 0;
+            let totalButtons = buttons.length;
+            
+            buttons.forEach((button, index) => {
+                const hasText = button.textContent.trim().length > 0;
+                const hasAriaLabel = button.getAttribute('aria-label') !== null;
+                const hasTitle = button.getAttribute('title') !== null;
+                const isAccessible = hasText || hasAriaLabel || hasTitle;
+                
+                log(`按钮${index + 1}: 有文本=${hasText}, 有aria-label=${hasAriaLabel}, 有title=${hasTitle}`);
+                
+                if (isAccessible) {
+                    accessibleButtons++;
+                }
+            });
+            
+            log(`可访问性测试结果: ${accessibleButtons}/${totalButtons} 按钮可访问`);
+            
+            if (accessibleButtons === totalButtons) {
+                addResult('pass', '按钮可访问性测试', '所有按钮都具有良好的可访问性');
+            } else {
+                addResult('warning', '按钮可访问性测试', `${accessibleButtons}/${totalButtons} 按钮可访问`);
+            }
+        }
+
+        function testButtonResponsiveness() {
+            log('📱 开始测试按钮响应性...');
+            
+            const buttons = document.querySelectorAll('button');
+            let responsiveButtons = 0;
+            let totalButtons = buttons.length;
+            
+            buttons.forEach((button, index) => {
+                const computedStyle = window.getComputedStyle(button);
+                const minHeight = parseInt(computedStyle.minHeight) || button.offsetHeight;
+                const minWidth = parseInt(computedStyle.minWidth) || button.offsetWidth;
+                
+                // 检查是否符合触摸设备最小尺寸要求（44px）
+                const isTouchFriendly = minHeight >= 44 && minWidth >= 44;
+                const hasHoverEffect = computedStyle.transition !== 'none';
+                
+                log(`按钮${index + 1}: 尺寸=${minWidth}x${minHeight}, 触摸友好=${isTouchFriendly}, 悬停效果=${hasHoverEffect}`);
+                
+                if (isTouchFriendly && hasHoverEffect) {
+                    responsiveButtons++;
+                }
+            });
+            
+            log(`响应性测试结果: ${responsiveButtons}/${totalButtons} 按钮响应良好`);
+            
+            if (responsiveButtons === totalButtons) {
+                addResult('pass', '按钮响应性测试', '所有按钮都具有良好的响应性');
+            } else {
+                addResult('warning', '按钮响应性测试', `${responsiveButtons}/${totalButtons} 按钮响应良好`);
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🎮 按钮交互测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

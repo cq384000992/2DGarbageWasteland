@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>初始化调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .debug-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        .success {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 初始化调试工具</h1>
+    
+    <div class="debug-section">
+        <h2>📋 调试信息</h2>
+        <button onclick="checkGlobalVariables()">检查全局变量</button>
+        <button onclick="checkDOMElements()">检查DOM元素</button>
+        <button onclick="checkErrorLogs()">检查错误日志</button>
+        <button onclick="clearDebug()">清空调试信息</button>
+        <div class="debug-info" id="debugInfo"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🎯 手动初始化</h2>
+        <button onclick="manualInitialize()">手动初始化游戏引擎</button>
+        <button onclick="testButtonClick()">测试按钮点击</button>
+        <div class="debug-info" id="manualInfo"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkGlobalVariables() {
+            log('debugInfo', '=== 检查全局变量 ===');
+            
+            // 检查gameEngine
+            if (typeof gameEngine !== 'undefined') {
+                log('debugInfo', '✅ gameEngine 存在');
+                log('debugInfo', `类型: ${typeof gameEngine}`);
+                log('debugInfo', `是否为null: ${gameEngine === null}`);
+                if (gameEngine) {
+                    log('debugInfo', `游戏状态: ${gameEngine.gameState}`);
+                    log('debugInfo', `是否运行: ${gameEngine.isRunning}`);
+                }
+            } else {
+                log('debugInfo', '❌ gameEngine 不存在');
+            }
+            
+            // 检查其他全局变量
+            const globalVars = ['CONFIG', 'UIManagerSingleton', 'AudioManagerSingleton', 'InputManager'];
+            globalVars.forEach(varName => {
+                if (typeof window[varName] !== 'undefined') {
+                    log('debugInfo', `✅ ${varName} 存在`);
+                } else {
+                    log('debugInfo', `❌ ${varName} 不存在`);
+                }
+            });
+        }
+
+        function checkDOMElements() {
+            log('debugInfo', '=== 检查DOM元素 ===');
+            
+            const elements = ['gameCanvas', 'startButton', 'restartButton', 'startScreen', 'gameOverScreen'];
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    log('debugInfo', `✅ ${id} 存在`);
+                    log('debugInfo', `  类型: ${element.tagName}`);
+                    log('debugInfo', `  可见性: ${element.style.display !== 'none' ? '可见' : '不可见'}`);
+                } else {
+                    log('debugInfo', `❌ ${id} 不存在`);
+                }
+            });
+        }
+
+        function checkErrorLogs() {
+            log('debugInfo', '=== 检查错误日志 ===');
+            
+            // 重写console.error来捕获错误
+            const originalError = console.error;
+            console.error = function(...args) {
+                log('debugInfo', `❌ 错误: ${args.join(' ')}`);
+                originalError.apply(console, args);
+            };
+            
+            log('debugInfo', '错误捕获已启用');
+        }
+
+        function manualInitialize() {
+            log('manualInfo', '=== 手动初始化 ===');
+            
+            try {
+                log('manualInfo', '开始手动初始化游戏引擎...');
+                
+                // 检查必要的依赖
+                if (typeof CONFIG === 'undefined') {
+                    log('manualInfo', '❌ CONFIG 未定义');
+                    return;
+                }
+                
+                if (typeof UIManagerSingleton === 'undefined') {
+                    log('manualInfo', '❌ UIManagerSingleton 未定义');
+                    return;
+                }
+                
+                if (typeof AudioManagerSingleton === 'undefined') {
+                    log('manualInfo', '❌ AudioManagerSingleton 未定义');
+                    return;
+                }
+                
+                if (typeof InputManager === 'undefined') {
+                    log('manualInfo', '❌ InputManager 未定义');
+                    return;
+                }
+                
+                log('manualInfo', '✅ 所有依赖都存在');
+                
+                // 手动创建游戏引擎
+                if (typeof GameEngine !== 'undefined') {
+                    log('manualInfo', '创建游戏引擎实例...');
+                    window.gameEngine = new GameEngine();
+                    log('manualInfo', '✅ 游戏引擎创建成功');
+                } else {
+                    log('manualInfo', '❌ GameEngine 类未定义');
+                }
+                
+            } catch (error) {
+                log('manualInfo', `❌ 初始化失败: ${error.message}`);
+                log('manualInfo', `错误堆栈: ${error.stack}`);
+            }
+        }
+
+        function testButtonClick() {
+            log('manualInfo', '=== 测试按钮点击 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('manualInfo', '❌ 找不到开始按钮');
+                return;
+            }
+            
+            log('manualInfo', '找到开始按钮，测试点击...');
+            startButton.click();
+            log('manualInfo', '点击完成');
+            
+            // 检查游戏状态
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('manualInfo', `游戏状态: ${gameEngine.gameState}`);
+                log('manualInfo', `是否运行: ${gameEngine.isRunning}`);
+            }
+        }
+
+        function clearDebug() {
+            document.getElementById('debugInfo').textContent = '';
+            document.getElementById('manualInfo').textContent = '';
+        }
+
+        // 页面加载时的初始化
+        window.onload = function() {
+            log('debugInfo', '页面加载完成');
+            log('debugInfo', '请运行检查来诊断问题');
+        };
+
+        // 监听DOMContentLoaded事件
+        document.addEventListener('DOMContentLoaded', function() {
+            log('debugInfo', 'DOMContentLoaded事件触发');
+        });
+
+        // 监听错误事件
+        window.addEventListener('error', function(event) {
+            log('debugInfo', `❌ 全局错误: ${event.error.message}`);
+            log('debugInfo', `文件: ${event.filename}:${event.lineno}:${event.colno}`);
+        });
+    </script>
+</body>
+</html>
+
+
+

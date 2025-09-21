@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按钮调试测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .button-test {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            background-color: rgba(78, 205, 196, 0.1);
+        }
+        
+        .button-test h3 {
+            color: #4ecdc4;
+            margin-top: 0;
+        }
+        
+        /* 复制原始按钮样式 */
+        #testButton {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d, #ffd93d);
+            color: #0f0f23;
+            border: none;
+            padding: 18px 40px;
+            font-size: 22px;
+            font-weight: 800;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 25px rgba(78, 205, 196, 0.4),
+                0 0 30px rgba(78, 205, 196, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            min-width: 120px;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+        
+        #testButton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        #testButton:hover::before {
+            left: 100%;
+        }
+        
+        #testButton:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 
+                0 12px 35px rgba(78, 205, 196, 0.6),
+                0 0 50px rgba(78, 205, 196, 0.5);
+        }
+        
+        .debug-info {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>按钮调试测试</h1>
+        
+        <div class="test-section">
+            <h2>基础按钮测试</h2>
+            <div class="button-test">
+                <h3>测试按钮（复制原始样式）</h3>
+                <button id="testButton">测试按钮</button>
+                <div class="debug-info" id="testButtonLog">等待测试...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>原始游戏按钮测试</h2>
+            <div class="button-test">
+                <h3>游戏开始按钮</h3>
+                <button id="startButton">开始游戏</button>
+                <div class="debug-info" id="startButtonLog">等待测试...</div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>DOM元素检查</h2>
+            <div class="debug-info" id="domCheckLog">检查中...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>事件监听器检查</h2>
+            <div class="debug-info" id="eventCheckLog">检查中...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>CSS样式检查</h2>
+            <div class="debug-info" id="cssCheckLog">检查中...</div>
+        </div>
+    </div>
+
+    <script>
+        class ButtonDebugTest {
+            constructor() {
+                this.logs = {
+                    testButton: [],
+                    startButton: [],
+                    domCheck: [],
+                    eventCheck: [],
+                    cssCheck: []
+                };
+                
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('testButton', '测试系统初始化完成', 'info');
+                this.setupTestButton();
+                this.checkDOM();
+                this.checkEvents();
+                this.checkCSS();
+            }
+            
+            log(section, message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+                this.logs[section].push(logEntry);
+                console.log(`[${section.toUpperCase()}] ${logEntry}`);
+                
+                // 保持最近20条日志
+                if (this.logs[section].length > 20) {
+                    this.logs[section].shift();
+                }
+                
+                this.updateLogDisplay(section);
+            }
+            
+            updateLogDisplay(section) {
+                const logElement = document.getElementById(`${section}Log`);
+                if (logElement) {
+                    logElement.textContent = this.logs[section].join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            setupTestButton() {
+                const testButton = document.getElementById('testButton');
+                if (testButton) {
+                    this.log('testButton', '找到测试按钮', 'success');
+                    
+                    // 添加各种事件监听器
+                    testButton.addEventListener('click', () => {
+                        this.log('testButton', '测试按钮被点击！', 'success');
+                    });
+                    
+                    testButton.addEventListener('mouseenter', () => {
+                        this.log('testButton', '鼠标进入按钮', 'info');
+                    });
+                    
+                    testButton.addEventListener('mouseleave', () => {
+                        this.log('testButton', '鼠标离开按钮', 'info');
+                    });
+                    
+                    testButton.addEventListener('mousedown', () => {
+                        this.log('testButton', '鼠标按下', 'info');
+                    });
+                    
+                    testButton.addEventListener('mouseup', () => {
+                        this.log('testButton', '鼠标释放', 'info');
+                    });
+                    
+                    this.log('testButton', '测试按钮事件监听器已设置', 'success');
+                } else {
+                    this.log('testButton', '未找到测试按钮', 'error');
+                }
+            }
+            
+            checkDOM() {
+                this.log('domCheck', '开始检查DOM元素...', 'info');
+                
+                // 检查开始按钮
+                const startButton = document.getElementById('startButton');
+                if (startButton) {
+                    this.log('domCheck', '找到开始按钮元素', 'success');
+                    this.log('domCheck', `按钮文本: "${startButton.textContent}"`, 'info');
+                    this.log('domCheck', `按钮可见性: ${startButton.style.display}`, 'info');
+                    this.log('domCheck', `按钮禁用状态: ${startButton.disabled}`, 'info');
+                    this.log('domCheck', `按钮指针事件: ${getComputedStyle(startButton).pointerEvents}`, 'info');
+                    this.log('domCheck', `按钮Z-index: ${getComputedStyle(startButton).zIndex}`, 'info');
+                    this.log('domCheck', `按钮位置: ${getComputedStyle(startButton).position}`, 'info');
+                } else {
+                    this.log('domCheck', '未找到开始按钮元素', 'error');
+                }
+                
+                // 检查父元素
+                const startScreen = document.getElementById('startScreen');
+                if (startScreen) {
+                    this.log('domCheck', '找到开始界面元素', 'success');
+                    this.log('domCheck', `界面显示状态: ${startScreen.style.display}`, 'info');
+                    this.log('domCheck', `界面指针事件: ${getComputedStyle(startScreen).pointerEvents}`, 'info');
+                } else {
+                    this.log('domCheck', '未找到开始界面元素', 'error');
+                }
+            }
+            
+            checkEvents() {
+                this.log('eventCheck', '开始检查事件监听器...', 'info');
+                
+                const startButton = document.getElementById('startButton');
+                if (startButton) {
+                    // 尝试获取事件监听器（这通常不可行，但我们可以测试）
+                    this.log('eventCheck', '开始按钮存在，尝试添加测试事件监听器', 'info');
+                    
+                    // 添加测试事件监听器
+                    const testHandler = () => {
+                        this.log('eventCheck', '测试事件监听器被触发！', 'success');
+                    };
+                    
+                    startButton.addEventListener('click', testHandler);
+                    this.log('eventCheck', '测试事件监听器已添加', 'success');
+                    
+                    // 检查按钮是否可点击
+                    const rect = startButton.getBoundingClientRect();
+                    this.log('eventCheck', `按钮位置: x=${rect.x}, y=${rect.y}, width=${rect.width}, height=${rect.height}`, 'info');
+                    
+                    if (rect.width > 0 && rect.height > 0) {
+                        this.log('eventCheck', '按钮有有效尺寸', 'success');
+                    } else {
+                        this.log('eventCheck', '按钮尺寸无效', 'error');
+                    }
+                } else {
+                    this.log('eventCheck', '开始按钮不存在，无法检查事件', 'error');
+                }
+            }
+            
+            checkCSS() {
+                this.log('cssCheck', '开始检查CSS样式...', 'info');
+                
+                const startButton = document.getElementById('startButton');
+                if (startButton) {
+                    const styles = getComputedStyle(startButton);
+                    
+                    this.log('cssCheck', `背景色: ${styles.backgroundColor}`, 'info');
+                    this.log('cssCheck', `边框: ${styles.border}`, 'info');
+                    this.log('cssCheck', `光标: ${styles.cursor}`, 'info');
+                    this.log('cssCheck', `指针事件: ${styles.pointerEvents}`, 'info');
+                    this.log('cssCheck', `用户选择: ${styles.userSelect}`, 'info');
+                    this.log('cssCheck', `变换: ${styles.transform}`, 'info');
+                    this.log('cssCheck', `过渡: ${styles.transition}`, 'info');
+                    this.log('cssCheck', `盒阴影: ${styles.boxShadow}`, 'info');
+                    
+                    // 检查悬浮状态
+                    if (styles.cursor === 'pointer') {
+                        this.log('cssCheck', '按钮光标样式正确', 'success');
+                    } else {
+                        this.log('cssCheck', '按钮光标样式异常', 'error');
+                    }
+                    
+                    if (styles.pointerEvents === 'auto') {
+                        this.log('cssCheck', '按钮指针事件正常', 'success');
+                    } else {
+                        this.log('cssCheck', '按钮指针事件异常', 'error');
+                    }
+                } else {
+                    this.log('cssCheck', '开始按钮不存在，无法检查CSS', 'error');
+                }
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            new ButtonDebugTest();
+        });
+    </script>
+</body>
+</html>

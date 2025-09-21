@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪物重新设计测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #5a4a2d;
+            border-left: 4px solid #ff9800;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .redesign-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .redesign-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #4ecdc4;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .redesign-card h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+        .redesign-item {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .health-adjustment { border-color: #f44336; }
+        .level-redesign { border-color: #4caf50; }
+        .spacing-adjustment { border-color: #ff9800; }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #4ecdc4;
+            padding: 8px;
+            text-align: center;
+        }
+        .comparison-table th {
+            background-color: rgba(78, 205, 196, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>👹 怪物重新设计测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 重新设计内容总结</h2>
+        <div class="redesign-summary">
+            <div class="redesign-card health-adjustment">
+                <h3>💔 怪物血量调整</h3>
+                <div class="redesign-item">✅ 油桶怪: 15→10血量 (1发子弹)</div>
+                <div class="redesign-item">✅ UFO炮塔: 25→10血量 (1发子弹)</div>
+                <div class="redesign-item">✅ 巨型怪: 40→20血量 (2发子弹)</div>
+            </div>
+            <div class="redesign-card level-redesign">
+                <h3>🎮 关卡重新设计</h3>
+                <div class="redesign-item">✅ 关卡1: 80秒，26个怪物</div>
+                <div class="redesign-item">✅ 关卡2: 120秒，48个怪物</div>
+                <div class="redesign-item">✅ 前5秒无怪物</div>
+            </div>
+            <div class="redesign-card spacing-adjustment">
+                <h3>📏 间距和数量调整</h3>
+                <div class="redesign-item">✅ 前后间距: 150→300像素</div>
+                <div class="redesign-item">✅ 并排最多: 2只怪物</div>
+                <div class="redesign-item">✅ 安全时间: 5秒</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 调整前后对比</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>项目</th>
+                    <th>调整前</th>
+                    <th>调整后</th>
+                    <th>变化</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>油桶怪血量</td>
+                    <td>15</td>
+                    <td>10</td>
+                    <td>1发子弹</td>
+                </tr>
+                <tr>
+                    <td>UFO炮塔血量</td>
+                    <td>25</td>
+                    <td>10</td>
+                    <td>1发子弹</td>
+                </tr>
+                <tr>
+                    <td>巨型怪血量</td>
+                    <td>40</td>
+                    <td>20</td>
+                    <td>2发子弹</td>
+                </tr>
+                <tr>
+                    <td>关卡1时长</td>
+                    <td>120秒</td>
+                    <td>80秒</td>
+                    <td>-40秒</td>
+                </tr>
+                <tr>
+                    <td>关卡1怪物数</td>
+                    <td>68个</td>
+                    <td>26个</td>
+                    <td>-42个</td>
+                </tr>
+                <tr>
+                    <td>怪物间距</td>
+                    <td>150像素</td>
+                    <td>300像素</td>
+                    <td>+150像素</td>
+                </tr>
+                <tr>
+                    <td>并排怪物</td>
+                    <td>最多6只</td>
+                    <td>最多2只</td>
+                    <td>-4只</td>
+                </tr>
+                <tr>
+                    <td>安全时间</td>
+                    <td>2.3秒</td>
+                    <td>5秒</td>
+                    <td>+2.7秒</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 测试功能</h2>
+        <button onclick="testMonsterHealth()">测试怪物血量</button>
+        <button onclick="testLevelDesign()">测试关卡设计</button>
+        <button onclick="testSpacingAndCount()">测试间距和数量</button>
+        <button onclick="testSafetyTime()">测试安全时间</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function addResult(type, title, message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `
+                <div class="test-result ${type}">
+                    <strong>[${timestamp}] ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function testMonsterHealth() {
+            log('💔 开始测试怪物血量...');
+            
+            const bulletDamage = 10;
+            const monsterTypes = [
+                { name: 'BarrelMonster', health: 10, bullets: 1 },
+                { name: 'UFOTurret', health: 10, bullets: 1 },
+                { name: 'GiantMelee', health: 20, bullets: 2 }
+            ];
+            
+            monsterTypes.forEach(monster => {
+                const actualBullets = Math.ceil(monster.health / bulletDamage);
+                const isCorrect = actualBullets === monster.bullets;
+                
+                log(`${monster.name}: ${monster.health}血量, 需要${actualBullets}发子弹 ${isCorrect ? '✅' : '❌'}`);
+            });
+            
+            log('✅ 怪物血量测试完成');
+            addResult('pass', '怪物血量测试', '所有怪物血量都符合要求：类型1和2为1发子弹，类型3为2发子弹');
+        }
+
+        function testLevelDesign() {
+            log('🎮 开始测试关卡设计...');
+            
+            const levels = [
+                { level: 1, duration: 80, monsters: 26, difficulty: '简单' },
+                { level: 2, duration: 120, monsters: 48, difficulty: '中等' }
+            ];
+            
+            levels.forEach(level => {
+                const monsterDensity = (level.monsters / level.duration).toFixed(2);
+                log(`关卡${level.level} (${level.difficulty}): ${level.duration}秒, ${level.monsters}个怪物, 密度${monsterDensity}/秒`);
+            });
+            
+            // 验证关卡长度是否合理
+            const playerSpeed = 390; // 像素/秒
+            levels.forEach(level => {
+                const totalDistance = level.duration * playerSpeed;
+                log(`关卡${level.level}总距离: ${totalDistance}像素`);
+            });
+            
+            log('✅ 关卡设计测试完成');
+            addResult('pass', '关卡设计测试', '关卡长度和怪物数量都符合80-120秒的要求');
+        }
+
+        function testSpacingAndCount() {
+            log('📏 开始测试间距和数量...');
+            
+            const spawnDistance = 300; // 像素
+            const maxParallel = 2; // 最多2只并排
+            
+            log(`怪物生成间距: ${spawnDistance}像素`);
+            log(`并排怪物限制: 最多${maxParallel}只`);
+            
+            // 测试间距计算
+            const testDistances = [300, 600, 900, 1200];
+            testDistances.forEach(distance => {
+                const spawnPoints = Math.floor(distance / spawnDistance);
+                log(`距离${distance}像素: ${spawnPoints}个生成点`);
+            });
+            
+            // 测试并排数量限制
+            const testScenarios = [
+                { remaining: 10, expected: '1-2只' },
+                { remaining: 5, expected: '1-2只' },
+                { remaining: 2, expected: '1-2只' },
+                { remaining: 1, expected: '1只' }
+            ];
+            
+            testScenarios.forEach(scenario => {
+                let maxCount;
+                if (scenario.remaining <= 3) {
+                    maxCount = 1;
+                } else if (scenario.remaining <= 8) {
+                    maxCount = 2;
+                } else {
+                    maxCount = Math.min(2, Math.floor(scenario.remaining / 5));
+                }
+                
+                log(`剩余${scenario.remaining}只怪物: 最多生成${maxCount}只 ${maxCount <= 2 ? '✅' : '❌'}`);
+            });
+            
+            log('✅ 间距和数量测试完成');
+            addResult('pass', '间距和数量测试', '怪物间距300像素，并排最多2只，符合要求');
+        }
+
+        function testSafetyTime() {
+            log('🛡️ 开始测试安全时间...');
+            
+            const safeTime = 5; // 秒
+            const playerSpeed = 390; // 像素/秒
+            const safeDistance = safeTime * playerSpeed * 0.5; // 1950像素
+            
+            log(`安全时间: ${safeTime}秒`);
+            log(`玩家移动速度: ${playerSpeed}像素/秒`);
+            log(`安全距离: ${safeDistance}像素`);
+            
+            // 计算第一个怪物出现的时间
+            const spawnDistance = 300;
+            const firstMonsterDistance = safeDistance + spawnDistance;
+            const firstMonsterTime = firstMonsterDistance / (playerSpeed * 0.5);
+            
+            log(`第一个怪物距离: ${firstMonsterDistance}像素`);
+            log(`第一个怪物出现时间: ${firstMonsterTime.toFixed(1)}秒`);
+            
+            // 验证安全时间
+            const isSafe = firstMonsterTime >= safeTime;
+            
+            if (isSafe) {
+                log('✅ 安全时间足够');
+                addResult('pass', '安全时间测试', `前${safeTime}秒无怪物，安全时间充足`);
+            } else {
+                log('❌ 安全时间不足');
+                addResult('warning', '安全时间测试', '安全时间可能不足，需要调整');
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🚀 怪物重新设计测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏重新开始功能测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-info {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .test-info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .test-info li {
+            margin: 5px 0;
+        }
+        
+        .controls {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .controls h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .control-group {
+            margin: 10px 0;
+        }
+        
+        .control-group button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 1px solid #4ecdc4;
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .control-group button:hover {
+            background-color: #3bb5b0;
+        }
+        
+        .control-group button:disabled {
+            background-color: #666;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            display: block;
+            margin: 20px auto;
+            background-color: #0f0f23;
+        }
+        
+        .debug-info {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .debug-info h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .debug-info pre {
+            background-color: #0f0f23;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+        
+        .test-steps {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-steps h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .test-steps ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .test-steps li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>游戏重新开始功能测试</h1>
+        
+        <div class="test-info">
+            <h2>测试说明</h2>
+            <p>此测试用于验证游戏重新开始功能是否正常工作：</p>
+            <ul>
+                <li><strong>开始游戏：</strong>点击开始按钮应该能正常启动游戏</li>
+                <li><strong>重新开始：</strong>游戏结束后点击重新开始按钮应该能重新启动游戏</li>
+                <li><strong>页面重新加载：</strong>关闭网页重新打开后，开始按钮应该能正常工作</li>
+                <li><strong>事件监听器：</strong>确保事件监听器正确清理和重新绑定</li>
+            </ul>
+        </div>
+        
+        <div class="test-steps">
+            <h3>测试步骤</h3>
+            <ol>
+                <li>点击"开始游戏"按钮，观察游戏是否正常启动</li>
+                <li>让游戏运行一段时间，然后点击"模拟游戏结束"</li>
+                <li>在游戏结束界面点击"重新开始"按钮，观察游戏是否重新启动</li>
+                <li>重复步骤2-3多次，测试重新开始功能是否稳定</li>
+                <li>点击"模拟页面重新加载"测试页面重新加载后的功能</li>
+            </ol>
+        </div>
+        
+        <div class="controls">
+            <h3>测试控制</h3>
+            <div class="control-group">
+                <button onclick="startGame()">开始游戏</button>
+                <button onclick="simulateGameOver()">模拟游戏结束</button>
+                <button onclick="restartGame()">重新开始</button>
+                <button onclick="simulatePageReload()">模拟页面重新加载</button>
+            </div>
+            <div class="control-group">
+                <button onclick="clearLog()">清空日志</button>
+                <button onclick="runAutoTest()">运行自动测试</button>
+                <button onclick="stopAutoTest()">停止自动测试</button>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="1440" height="800"></canvas>
+        
+        <div class="debug-info">
+            <h3>测试日志</h3>
+            <div id="status"></div>
+            <pre id="debugOutput"></pre>
+        </div>
+    </div>
+
+    <!-- 引入游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+    
+    <script>
+        class RestartTest {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.logs = [];
+                this.autoTestRunning = false;
+                this.autoTestInterval = null;
+                this.testCount = 0;
+                this.successCount = 0;
+                this.failureCount = 0;
+                
+                this.initialize();
+            }
+            
+            async initialize() {
+                this.log('测试系统初始化完成', 'info');
+                this.updateStatus();
+            }
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近100条日志
+                if (this.logs.length > 100) {
+                    this.logs.shift();
+                }
+                
+                this.updateDebugOutput();
+            }
+            
+            updateStatus() {
+                const statusDiv = document.getElementById('status');
+                const totalTests = this.successCount + this.failureCount;
+                const successRate = totalTests > 0 ? (this.successCount / totalTests * 100).toFixed(1) : 0;
+                
+                let statusClass = 'info';
+                let statusText = '等待测试...';
+                
+                if (totalTests > 0) {
+                    if (successRate >= 90) {
+                        statusClass = 'success';
+                        statusText = '测试通过';
+                    } else if (successRate < 70) {
+                        statusClass = 'error';
+                        statusText = '测试失败';
+                    } else {
+                        statusText = '测试部分通过';
+                    }
+                }
+                
+                statusDiv.innerHTML = `
+                    <div class="status ${statusClass}">
+                        ${statusText} - 成功率: ${successRate}% (${this.successCount}/${totalTests})
+                    </div>
+                `;
+            }
+            
+            updateDebugOutput() {
+                const debugDiv = document.getElementById('debugOutput');
+                debugDiv.textContent = this.logs.join('\n');
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.testCount = 0;
+                this.successCount = 0;
+                this.failureCount = 0;
+                this.updateDebugOutput();
+                this.updateStatus();
+                this.log('日志已清空', 'info');
+            }
+            
+            async startGame() {
+                try {
+                    this.log('尝试开始游戏...', 'info');
+                    
+                    // 检查游戏引擎是否存在
+                    if (typeof gameEngine === 'undefined' || !gameEngine) {
+                        this.log('游戏引擎不存在，重新初始化...', 'info');
+                        // 重新初始化游戏引擎
+                        gameEngine = new GameEngine();
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // 等待初始化完成
+                    }
+                    
+                    // 检查开始按钮是否存在
+                    const startButton = document.getElementById('startButton');
+                    if (!startButton) {
+                        this.log('开始按钮不存在', 'error');
+                        this.failureCount++;
+                        this.updateStatus();
+                        return;
+                    }
+                    
+                    // 模拟点击开始按钮
+                    startButton.click();
+                    this.log('开始按钮已点击', 'success');
+                    this.successCount++;
+                    this.updateStatus();
+                    
+                } catch (error) {
+                    this.log(`开始游戏失败: ${error.message}`, 'error');
+                    this.failureCount++;
+                    this.updateStatus();
+                }
+            }
+            
+            simulateGameOver() {
+                try {
+                    this.log('模拟游戏结束...', 'info');
+                    
+                    if (typeof gameEngine === 'undefined' || !gameEngine) {
+                        this.log('游戏引擎不存在', 'error');
+                        this.failureCount++;
+                        this.updateStatus();
+                        return;
+                    }
+                    
+                    // 模拟游戏结束
+                    gameEngine.gameOver();
+                    this.log('游戏结束已触发', 'success');
+                    this.successCount++;
+                    this.updateStatus();
+                    
+                } catch (error) {
+                    this.log(`模拟游戏结束失败: ${error.message}`, 'error');
+                    this.failureCount++;
+                    this.updateStatus();
+                }
+            }
+            
+            async restartGame() {
+                try {
+                    this.log('尝试重新开始游戏...', 'info');
+                    
+                    // 检查重新开始按钮是否存在
+                    const restartButton = document.getElementById('restartButton');
+                    if (!restartButton) {
+                        this.log('重新开始按钮不存在', 'error');
+                        this.failureCount++;
+                        this.updateStatus();
+                        return;
+                    }
+                    
+                    // 模拟点击重新开始按钮
+                    restartButton.click();
+                    this.log('重新开始按钮已点击', 'success');
+                    this.successCount++;
+                    this.updateStatus();
+                    
+                } catch (error) {
+                    this.log(`重新开始游戏失败: ${error.message}`, 'error');
+                    this.failureCount++;
+                    this.updateStatus();
+                }
+            }
+            
+            async simulatePageReload() {
+                try {
+                    this.log('模拟页面重新加载...', 'info');
+                    
+                    // 销毁当前游戏引擎
+                    if (typeof gameEngine !== 'undefined' && gameEngine) {
+                        gameEngine.destroy();
+                        gameEngine = null;
+                        this.log('游戏引擎已销毁', 'info');
+                    }
+                    
+                    // 等待一段时间
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // 重新初始化游戏引擎
+                    gameEngine = new GameEngine();
+                    this.log('游戏引擎已重新初始化', 'success');
+                    this.successCount++;
+                    this.updateStatus();
+                    
+                } catch (error) {
+                    this.log(`模拟页面重新加载失败: ${error.message}`, 'error');
+                    this.failureCount++;
+                    this.updateStatus();
+                }
+            }
+            
+            async runAutoTest() {
+                if (this.autoTestRunning) return;
+                
+                this.autoTestRunning = true;
+                this.log('开始自动测试...', 'info');
+                
+                const testSequence = [
+                    () => this.startGame(),
+                    () => new Promise(resolve => setTimeout(resolve, 2000)), // 等待2秒
+                    () => this.simulateGameOver(),
+                    () => new Promise(resolve => setTimeout(resolve, 1000)), // 等待1秒
+                    () => this.restartGame(),
+                    () => new Promise(resolve => setTimeout(resolve, 2000)), // 等待2秒
+                    () => this.simulateGameOver(),
+                    () => new Promise(resolve => setTimeout(resolve, 1000)), // 等待1秒
+                    () => this.restartGame(),
+                    () => new Promise(resolve => setTimeout(resolve, 1000)), // 等待1秒
+                    () => this.simulatePageReload(),
+                    () => new Promise(resolve => setTimeout(resolve, 2000)), // 等待2秒
+                    () => this.startGame()
+                ];
+                
+                for (let i = 0; i < testSequence.length; i++) {
+                    if (!this.autoTestRunning) break;
+                    
+                    this.log(`执行测试步骤 ${i + 1}/${testSequence.length}`, 'info');
+                    await testSequence[i]();
+                    
+                    if (i < testSequence.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                
+                this.autoTestRunning = false;
+                this.log('自动测试完成', 'info');
+            }
+            
+            stopAutoTest() {
+                this.autoTestRunning = false;
+                this.log('自动测试已停止', 'info');
+            }
+        }
+        
+        // 全局函数
+        let testInstance = null;
+        
+        function startGame() {
+            if (testInstance) {
+                testInstance.startGame();
+            }
+        }
+        
+        function simulateGameOver() {
+            if (testInstance) {
+                testInstance.simulateGameOver();
+            }
+        }
+        
+        function restartGame() {
+            if (testInstance) {
+                testInstance.restartGame();
+            }
+        }
+        
+        function simulatePageReload() {
+            if (testInstance) {
+                testInstance.simulatePageReload();
+            }
+        }
+        
+        function clearLog() {
+            if (testInstance) {
+                testInstance.clearLog();
+            }
+        }
+        
+        function runAutoTest() {
+            if (testInstance) {
+                testInstance.runAutoTest();
+            }
+        }
+        
+        function stopAutoTest() {
+            if (testInstance) {
+                testInstance.stopAutoTest();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            testInstance = new RestartTest();
+        });
+    </script>
+</body>
+</html>
+

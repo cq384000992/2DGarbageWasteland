@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按钮修复测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-height: 44px;
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>按钮修复测试</h1>
+        
+        <div class="test-section">
+            <h2>问题诊断</h2>
+            <p>检查开始按钮无法点击的问题是否已修复。</p>
+            <button onclick="testButtonStatus()">检查按钮状态</button>
+            <button onclick="testEventListeners()">检查事件监听器</button>
+            <button onclick="testUIManager()">检查UI管理器</button>
+            <button onclick="clearLog()">清除日志</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏测试</h2>
+            <p>点击下面的按钮加载游戏，测试开始按钮是否正常工作：</p>
+            <button onclick="loadGame()">加载游戏</button>
+            <button onclick="reloadGame()">重新加载游戏</button>
+            <div class="game-frame" id="gameFrame">
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">
+                    点击"加载游戏"按钮开始测试
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试状态</h2>
+            <div id="testStatus" class="status info">等待开始测试</div>
+        </div>
+    </div>
+
+    <script>
+        class ButtonFixTest {
+            constructor() {
+                this.logs = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('按钮修复测试系统初始化完成');
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            updateStatus(message, type = 'info') {
+                const statusElement = document.getElementById('testStatus');
+                if (statusElement) {
+                    statusElement.textContent = message;
+                    statusElement.className = 'status ' + type;
+                }
+            }
+            
+            testButtonStatus() {
+                this.log('=== 按钮状态检查 ===');
+                
+                try {
+                    // 检查游戏页面中的按钮
+                    const gameFrame = document.getElementById('gameFrame');
+                    const iframe = gameFrame.querySelector('iframe');
+                    
+                    if (iframe && iframe.contentDocument) {
+                        const startButton = iframe.contentDocument.getElementById('startButton');
+                        if (startButton) {
+                            const styles = getComputedStyle(startButton);
+                            this.log('开始按钮状态:');
+                            this.log('- display: ' + styles.display);
+                            this.log('- pointer-events: ' + styles.pointerEvents);
+                            this.log('- cursor: ' + styles.cursor);
+                            this.log('- disabled: ' + startButton.disabled);
+                            this.log('- onclick: ' + (startButton.onclick ? '存在' : '不存在'));
+                            
+                            // 尝试触发点击
+                            try {
+                                startButton.click();
+                                this.log('按钮点击测试: 成功');
+                                this.updateStatus('按钮状态正常', 'success');
+                            } catch (error) {
+                                this.log('按钮点击测试: 失败 - ' + error.message);
+                                this.updateStatus('按钮点击失败', 'error');
+                            }
+                        } else {
+                            this.log('未找到开始按钮');
+                            this.updateStatus('未找到开始按钮', 'error');
+                        }
+                    } else {
+                        this.log('游戏iframe未加载或无法访问');
+                        this.updateStatus('请先加载游戏', 'info');
+                    }
+                } catch (error) {
+                    this.log('按钮状态检查失败: ' + error.message);
+                    this.updateStatus('检查失败: ' + error.message, 'error');
+                }
+            }
+            
+            testEventListeners() {
+                this.log('=== 事件监听器检查 ===');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    const iframe = gameFrame.querySelector('iframe');
+                    
+                    if (iframe && iframe.contentDocument) {
+                        const startButton = iframe.contentDocument.getElementById('startButton');
+                        if (startButton) {
+                            // 检查是否有事件监听器
+                            const hasEventListener = startButton.addEventListener !== undefined;
+                            this.log('addEventListener方法: ' + (hasEventListener ? '可用' : '不可用'));
+                            
+                            // 检查按钮的父元素
+                            const parentElement = startButton.parentElement;
+                            this.log('父元素: ' + (parentElement ? parentElement.tagName : '无'));
+                            
+                            // 检查按钮是否在视口内
+                            const rect = startButton.getBoundingClientRect();
+                            this.log('按钮位置: x=' + rect.x + ', y=' + rect.y + ', width=' + rect.width + ', height=' + rect.height);
+                            
+                            this.log('事件监听器检查完成');
+                        } else {
+                            this.log('未找到开始按钮');
+                        }
+                    } else {
+                        this.log('游戏iframe未加载');
+                    }
+                } catch (error) {
+                    this.log('事件监听器检查失败: ' + error.message);
+                }
+            }
+            
+            testUIManager() {
+                this.log('=== UI管理器检查 ===');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    const iframe = gameFrame.querySelector('iframe');
+                    
+                    if (iframe && iframe.contentWindow) {
+                        const gameWindow = iframe.contentWindow;
+                        
+                        // 检查UI管理器是否存在
+                        if (typeof gameWindow.UIManagerSingleton !== 'undefined') {
+                            this.log('UIManagerSingleton: 存在');
+                            
+                            const uiSingleton = gameWindow.UIManagerSingleton.getInstance();
+                            if (uiSingleton && uiSingleton.uiManager) {
+                                this.log('UI管理器实例: 存在');
+                                
+                                // 检查回调函数
+                                const hasCallbacks = uiSingleton.uiManager.onGameStart !== null;
+                                this.log('游戏开始回调: ' + (hasCallbacks ? '已设置' : '未设置'));
+                                
+                                // 检查事件处理器
+                                const hasHandler = uiSingleton.uiManager.startButtonHandler !== null;
+                                this.log('开始按钮处理器: ' + (hasHandler ? '已设置' : '未设置'));
+                                
+                                this.updateStatus('UI管理器状态正常', 'success');
+                            } else {
+                                this.log('UI管理器实例: 不存在');
+                                this.updateStatus('UI管理器实例不存在', 'error');
+                            }
+                        } else {
+                            this.log('UIManagerSingleton: 不存在');
+                            this.updateStatus('UIManagerSingleton不存在', 'error');
+                        }
+                    } else {
+                        this.log('游戏iframe未加载');
+                        this.updateStatus('请先加载游戏', 'info');
+                    }
+                } catch (error) {
+                    this.log('UI管理器检查失败: ' + error.message);
+                    this.updateStatus('UI管理器检查失败', 'error');
+                }
+            }
+            
+            loadGame() {
+                this.log('开始加载游戏...');
+                this.updateStatus('正在加载游戏...', 'info');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    if (gameFrame) {
+                        // 创建iframe加载游戏
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'index.html';
+                        iframe.onload = () => {
+                            this.log('游戏页面加载完成');
+                            this.updateStatus('游戏加载完成', 'success');
+                            
+                            // 延迟检查按钮状态
+                            setTimeout(() => {
+                                this.testButtonStatus();
+                            }, 1000);
+                        };
+                        iframe.onerror = () => {
+                            this.log('游戏页面加载失败');
+                            this.updateStatus('游戏加载失败', 'error');
+                        };
+                        
+                        // 清空容器并添加iframe
+                        gameFrame.innerHTML = '';
+                        gameFrame.appendChild(iframe);
+                        
+                        this.log('游戏iframe已创建');
+                    } else {
+                        throw new Error('游戏容器不存在');
+                    }
+                } catch (error) {
+                    this.log('加载游戏时出错: ' + error.message);
+                    this.updateStatus('加载游戏失败: ' + error.message, 'error');
+                }
+            }
+            
+            reloadGame() {
+                this.log('重新加载游戏...');
+                this.updateStatus('正在重新加载游戏...', 'info');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    if (gameFrame) {
+                        const iframe = gameFrame.querySelector('iframe');
+                        if (iframe) {
+                            // 重新加载iframe
+                            iframe.src = iframe.src;
+                            this.log('游戏iframe已重新加载');
+                        } else {
+                            this.log('未找到游戏iframe，重新创建');
+                            this.loadGame();
+                        }
+                    } else {
+                        throw new Error('游戏容器不存在');
+                    }
+                } catch (error) {
+                    this.log('重新加载游戏时出错: ' + error.message);
+                    this.updateStatus('重新加载游戏失败: ' + error.message, 'error');
+                }
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清除');
+            }
+        }
+        
+        // 全局变量
+        let buttonFixTest = null;
+        
+        // 全局函数
+        function testButtonStatus() {
+            if (buttonFixTest) {
+                buttonFixTest.testButtonStatus();
+            }
+        }
+        
+        function testEventListeners() {
+            if (buttonFixTest) {
+                buttonFixTest.testEventListeners();
+            }
+        }
+        
+        function testUIManager() {
+            if (buttonFixTest) {
+                buttonFixTest.testUIManager();
+            }
+        }
+        
+        function loadGame() {
+            if (buttonFixTest) {
+                buttonFixTest.loadGame();
+            }
+        }
+        
+        function reloadGame() {
+            if (buttonFixTest) {
+                buttonFixTest.reloadGame();
+            }
+        }
+        
+        function clearLog() {
+            if (buttonFixTest) {
+                buttonFixTest.clearLog();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            buttonFixTest = new ButtonFixTest();
+        });
+        
+        // 捕获全局错误
+        window.addEventListener('error', (event) => {
+            console.error('全局错误:', event.error);
+            if (buttonFixTest) {
+                buttonFixTest.log('全局错误: ' + event.error.message);
+            }
+        });
+    </script>
+</body>
+</html>

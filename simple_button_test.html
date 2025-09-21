@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单按钮测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-height: 44px;
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>简单按钮测试</h1>
+        
+        <div class="test-section">
+            <h2>基础按钮测试</h2>
+            <button onclick="testClick()">点击测试</button>
+            <button onclick="testAlert()">弹窗测试</button>
+            <button onclick="testConsole()">控制台测试</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>事件监听器测试</h2>
+            <button id="eventBtn">事件监听器测试</button>
+            <div class="log" id="eventLog">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        // 基础测试函数
+        function testClick() {
+            const log = document.getElementById('testLog');
+            log.textContent += '\n[点击测试] 按钮被点击！';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function testAlert() {
+            const log = document.getElementById('testLog');
+            log.textContent += '\n[弹窗测试] 准备显示弹窗...';
+            log.scrollTop = log.scrollHeight;
+            alert('弹窗测试成功！');
+            log.textContent += '\n[弹窗测试] 弹窗已关闭';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function testConsole() {
+            const log = document.getElementById('testLog');
+            log.textContent += '\n[控制台测试] 输出到控制台...';
+            log.scrollTop = log.scrollHeight;
+            console.log('控制台测试消息');
+            log.textContent += '\n[控制台测试] 完成';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        // 页面加载完成后设置事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('页面加载完成，设置事件监听器...');
+            
+            const eventBtn = document.getElementById('eventBtn');
+            const eventLog = document.getElementById('eventLog');
+            
+            if (eventBtn) {
+                eventBtn.addEventListener('click', function() {
+                    eventLog.textContent += '\n[事件监听器] 按钮被点击！';
+                    eventLog.scrollTop = eventLog.scrollHeight;
+                });
+                
+                eventBtn.addEventListener('mouseenter', function() {
+                    eventLog.textContent += '\n[事件监听器] 鼠标进入';
+                    eventLog.scrollTop = eventLog.scrollHeight;
+                });
+                
+                eventBtn.addEventListener('mouseleave', function() {
+                    eventLog.textContent += '\n[事件监听器] 鼠标离开';
+                    eventLog.scrollTop = eventLog.scrollHeight;
+                });
+                
+                console.log('事件监听器设置完成');
+            } else {
+                console.error('未找到事件测试按钮');
+            }
+            
+            // 初始化日志
+            const testLog = document.getElementById('testLog');
+            if (testLog) {
+                testLog.textContent = '[系统] 页面加载完成，按钮测试准备就绪';
+            }
+            
+            if (eventLog) {
+                eventLog.textContent = '[系统] 事件监听器已设置';
+            }
+        });
+        
+        // 捕获错误
+        window.addEventListener('error', function(event) {
+            console.error('页面错误:', event.error);
+            const testLog = document.getElementById('testLog');
+            if (testLog) {
+                testLog.textContent += '\n[错误] ' + event.error.message;
+                testLog.scrollTop = testLog.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>

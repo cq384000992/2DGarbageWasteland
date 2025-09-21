@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 修复验证测试</h1>
+    
+    <div class="test-section">
+        <h2>📊 修复内容</h2>
+        <div class="test-result info">
+            <strong>修复1:</strong> 远程怪物(UFO炮塔)现在只在屏幕内时才会发射子弹
+        </div>
+        <div class="test-result info">
+            <strong>修复2:</strong> 怪物间最小间距增加到100像素，避免重叠
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 远程怪物射击修复</h2>
+        <button onclick="testRemoteShooting()">测试远程怪物射击逻辑</button>
+        <div id="shooting-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>👹 怪物间距修复</h2>
+        <button onclick="testMonsterSpacing()">测试怪物间距计算</button>
+        <div id="spacing-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // 模拟配置
+        const CONFIG = {
+            ENEMIES: {
+                UFO_TURRET: { 
+                    WIDTH: 400, 
+                    HEIGHT: 600,
+                    BULLET_SPEED: 400,
+                    BULLET_WIDTH: 15,
+                    BULLET_HEIGHT: 40,
+                    DAMAGE: 10
+                },
+                BARREL_MONSTER: { WIDTH: 300, HEIGHT: 450 },
+                GIANT_MELEE: { WIDTH: 500, HEIGHT: 750 }
+            },
+            GAME: {
+                CANVAS_WIDTH: 1440,
+                CANVAS_HEIGHT: 2560
+            }
+        };
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function testRemoteShooting() {
+            log('🎯 开始测试远程怪物射击逻辑...');
+            
+            // 模拟摄像机可见性检查
+            function isInView(worldX, worldY, width, height, cameraX, cameraY) {
+                const screenX = worldX - cameraX + CONFIG.GAME.CANVAS_WIDTH / 2;
+                const screenY = worldY - cameraY + CONFIG.GAME.CANVAS_HEIGHT / 2;
+                return screenX + width >= 0 && 
+                       screenX <= CONFIG.GAME.CANVAS_WIDTH &&
+                       screenY + height >= 0 && 
+                       screenY <= CONFIG.GAME.CANVAS_HEIGHT;
+            }
+            
+            // 测试场景
+            const testCases = [
+                { name: '怪物在屏幕内', monsterX: 720, monsterY: 1000, cameraX: 720, cameraY: 1000, expected: true },
+                { name: '怪物在屏幕上方', monsterX: 720, monsterY: 500, cameraX: 720, cameraY: 1000, expected: false },
+                { name: '怪物在屏幕下方', monsterX: 720, monsterY: 2000, cameraX: 720, cameraY: 1000, expected: false },
+                { name: '怪物在屏幕左侧', monsterX: 200, monsterY: 1000, cameraX: 720, cameraY: 1000, expected: false },
+                { name: '怪物在屏幕右侧', monsterX: 1400, monsterY: 1000, cameraX: 720, cameraY: 1000, expected: false }
+            ];
+            
+            let allPassed = true;
+            let results = '';
+            
+            testCases.forEach(testCase => {
+                const isVisible = isInView(
+                    testCase.monsterX, 
+                    testCase.monsterY, 
+                    CONFIG.ENEMIES.UFO_TURRET.WIDTH, 
+                    CONFIG.ENEMIES.UFO_TURRET.HEIGHT,
+                    testCase.cameraX,
+                    testCase.cameraY
+                );
+                
+                const passed = isVisible === testCase.expected;
+                allPassed = allPassed && passed;
+                
+                log(`${testCase.name}: 可见=${isVisible}, 预期=${testCase.expected}, ${passed ? '✅' : '❌'}`);
+                
+                results += `<div class="test-result ${passed ? 'pass' : 'info'}">
+                    ${testCase.name}: ${isVisible ? '可见' : '不可见'} ${passed ? '✅' : '❌'}
+                </div>`;
+            });
+            
+            document.getElementById('shooting-results').innerHTML = results;
+            
+            if (allPassed) {
+                log('✅ 远程怪物射击逻辑测试通过');
+            } else {
+                log('❌ 远程怪物射击逻辑测试失败');
+            }
+        }
+
+        function testMonsterSpacing() {
+            log('👹 开始测试怪物间距计算...');
+            
+            // 测试不同怪物组合的间距
+            const testCases = [
+                { name: 'GiantMelee + GiantMelee', width1: 500, width2: 500, expected: 600 },
+                { name: 'GiantMelee + UFOTurret', width1: 500, width2: 400, expected: 550 },
+                { name: 'UFOTurret + UFOTurret', width1: 400, width2: 400, expected: 500 },
+                { name: 'BarrelMonster + GiantMelee', width1: 300, width2: 500, expected: 500 },
+                { name: 'BarrelMonster + UFOTurret', width1: 300, width2: 400, expected: 450 },
+                { name: 'BarrelMonster + BarrelMonster', width1: 300, width2: 300, expected: 400 }
+            ];
+            
+            let allPassed = true;
+            let results = '';
+            
+            testCases.forEach(testCase => {
+                // 新的间距计算：所有怪物都使用100像素基础间距
+                const minDistance = (testCase.width1 + testCase.width2) / 2 + 100;
+                
+                const passed = minDistance === testCase.expected;
+                allPassed = allPassed && passed;
+                
+                log(`${testCase.name}: 计算=${minDistance}, 预期=${testCase.expected}, ${passed ? '✅' : '❌'}`);
+                
+                results += `<div class="test-result ${passed ? 'pass' : 'info'}">
+                    ${testCase.name}: ${minDistance}px ${passed ? '✅' : '❌'}
+                </div>`;
+            });
+            
+            // 测试空间是否足够
+            const maxRequiredSpace = 600; // GiantMelee + GiantMelee
+            const availableSpace = 620; // 720 - 100边距
+            
+            if (availableSpace >= maxRequiredSpace) {
+                log(`✅ 可用空间${availableSpace}px >= 最大需求${maxRequiredSpace}px`);
+                results += '<div class="test-result pass">✅ 空间充足：可以容纳最大怪物组合</div>';
+            } else {
+                log(`❌ 可用空间${availableSpace}px < 最大需求${maxRequiredSpace}px`);
+                results += '<div class="test-result info">❌ 空间不足：无法容纳最大怪物组合</div>';
+                allPassed = false;
+            }
+            
+            document.getElementById('spacing-results').innerHTML = results;
+            
+            if (allPassed) {
+                log('✅ 怪物间距计算测试通过');
+            } else {
+                log('❌ 怪物间距计算测试失败');
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🚀 修复验证测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

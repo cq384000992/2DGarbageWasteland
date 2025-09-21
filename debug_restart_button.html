@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重新开始按钮调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .debug-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        .success {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 重新开始按钮调试</h1>
+    
+    <div class="debug-section">
+        <h2>📋 按钮状态检查</h2>
+        <button onclick="checkRestartButton()">检查重新开始按钮</button>
+        <button onclick="checkGameState()">检查游戏状态</button>
+        <button onclick="checkEventListeners()">检查事件监听器</button>
+        <div class="debug-info" id="buttonInfo"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🎯 模拟游戏结束</h2>
+        <button onclick="simulateGameOver()">模拟游戏结束</button>
+        <button onclick="testRestartClick()">测试重新开始点击</button>
+        <button onclick="manualRestart()">手动重新开始</button>
+        <div class="debug-info" id="gameInfo"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔍 详细调试</h2>
+        <button onclick="debugUIManager()">调试UI管理器</button>
+        <button onclick="debugGameEngine()">调试游戏引擎</button>
+        <div class="debug-info" id="debugInfo"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkRestartButton() {
+            log('buttonInfo', '=== 检查重新开始按钮 ===');
+            
+            const restartButton = document.getElementById('restartButton');
+            if (!restartButton) {
+                log('buttonInfo', '❌ 找不到重新开始按钮');
+                return;
+            }
+            
+            log('buttonInfo', '✅ 重新开始按钮存在');
+            log('buttonInfo', `按钮ID: ${restartButton.id}`);
+            log('buttonInfo', `按钮文本: ${restartButton.textContent}`);
+            log('buttonInfo', `按钮类型: ${restartButton.type}`);
+            log('buttonInfo', `按钮可见性: ${restartButton.style.display !== 'none' ? '可见' : '不可见'}`);
+            log('buttonInfo', `按钮可点击性: ${!restartButton.disabled ? '可点击' : '不可点击'}`);
+            log('buttonInfo', `按钮位置: ${restartButton.offsetLeft}, ${restartButton.offsetTop}`);
+            log('buttonInfo', `按钮尺寸: ${restartButton.offsetWidth}x${restartButton.offsetHeight}`);
+        }
+
+        function checkGameState() {
+            log('buttonInfo', '=== 检查游戏状态 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('buttonInfo', '✅ 游戏引擎存在');
+                log('buttonInfo', `游戏状态: ${gameEngine.gameState}`);
+                log('buttonInfo', `是否运行: ${gameEngine.isRunning}`);
+                log('buttonInfo', `当前关卡: ${gameEngine.currentLevel}`);
+                log('buttonInfo', `分数: ${gameEngine.score}`);
+            } else {
+                log('buttonInfo', '❌ 游戏引擎不存在');
+            }
+        }
+
+        function checkEventListeners() {
+            log('buttonInfo', '=== 检查事件监听器 ===');
+            
+            const restartButton = document.getElementById('restartButton');
+            if (!restartButton) {
+                log('buttonInfo', '❌ 找不到重新开始按钮');
+                return;
+            }
+            
+            // 检查是否有事件监听器
+            const hasListeners = restartButton.onclick !== null || 
+                                restartButton.addEventListener !== undefined;
+            log('buttonInfo', `事件监听器状态: ${hasListeners ? '存在' : '不存在'}`);
+            
+            // 检查UI管理器
+            if (typeof gameEngine !== 'undefined' && gameEngine && gameEngine.uiManager) {
+                log('buttonInfo', '✅ UI管理器存在');
+                log('buttonInfo', `重新开始回调: ${typeof gameEngine.uiManager.onGameRestart}`);
+                log('buttonInfo', `重新开始处理器: ${typeof gameEngine.uiManager.restartButtonHandler}`);
+            } else {
+                log('buttonInfo', '❌ UI管理器不存在');
+            }
+        }
+
+        function simulateGameOver() {
+            log('gameInfo', '=== 模拟游戏结束 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('gameInfo', '调用gameOver()方法...');
+                gameEngine.gameOver();
+                log('gameInfo', 'gameOver()调用完成');
+                log('gameInfo', `游戏状态: ${gameEngine.gameState}`);
+                log('gameInfo', `是否运行: ${gameEngine.isRunning}`);
+                
+                // 检查游戏结束界面是否显示
+                const gameOverScreen = document.getElementById('gameOverScreen');
+                if (gameOverScreen) {
+                    log('gameInfo', `游戏结束界面显示状态: ${gameOverScreen.style.display}`);
+                }
+            } else {
+                log('gameInfo', '❌ 游戏引擎不存在');
+            }
+        }
+
+        function testRestartClick() {
+            log('gameInfo', '=== 测试重新开始点击 ===');
+            
+            const restartButton = document.getElementById('restartButton');
+            if (!restartButton) {
+                log('gameInfo', '❌ 找不到重新开始按钮');
+                return;
+            }
+            
+            log('gameInfo', '模拟点击重新开始按钮...');
+            restartButton.click();
+            log('gameInfo', '点击完成');
+            
+            // 检查游戏状态是否改变
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('gameInfo', `游戏状态: ${gameEngine.gameState}`);
+                log('gameInfo', `是否运行: ${gameEngine.isRunning}`);
+            }
+        }
+
+        function manualRestart() {
+            log('gameInfo', '=== 手动重新开始 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('gameInfo', '调用restartGame()方法...');
+                gameEngine.restartGame();
+                log('gameInfo', 'restartGame()调用完成');
+                log('gameInfo', `游戏状态: ${gameEngine.gameState}`);
+                log('gameInfo', `是否运行: ${gameEngine.isRunning}`);
+            } else {
+                log('gameInfo', '❌ 游戏引擎不存在');
+            }
+        }
+
+        function debugUIManager() {
+            log('debugInfo', '=== 调试UI管理器 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine && gameEngine.uiManager) {
+                const uiManager = gameEngine.uiManager;
+                log('debugInfo', '✅ UI管理器存在');
+                log('debugInfo', `开始回调: ${typeof uiManager.onGameStart}`);
+                log('debugInfo', `重新开始回调: ${typeof uiManager.onGameRestart}`);
+                log('debugInfo', `下一关回调: ${typeof uiManager.onNextLevel}`);
+                log('debugInfo', `开始按钮处理器: ${typeof uiManager.startButtonHandler}`);
+                log('debugInfo', `重新开始按钮处理器: ${typeof uiManager.restartButtonHandler}`);
+                log('debugInfo', `下一关按钮处理器: ${typeof uiManager.nextLevelButtonHandler}`);
+            } else {
+                log('debugInfo', '❌ UI管理器不存在');
+            }
+        }
+
+        function debugGameEngine() {
+            log('debugInfo', '=== 调试游戏引擎 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('debugInfo', '✅ 游戏引擎存在');
+                log('debugInfo', `游戏状态: ${gameEngine.gameState}`);
+                log('debugInfo', `是否运行: ${gameEngine.isRunning}`);
+                log('debugInfo', `动画ID: ${gameEngine.animationId}`);
+                log('debugInfo', `当前关卡: ${gameEngine.currentLevel}`);
+                log('debugInfo', `分数: ${gameEngine.score}`);
+                log('debugInfo', `玩家: ${gameEngine.player ? '存在' : '不存在'}`);
+                log('debugInfo', `敌人数量: ${gameEngine.enemies ? gameEngine.enemies.length : 0}`);
+                log('debugInfo', `子弹数量: ${gameEngine.bullets ? gameEngine.bullets.length : 0}`);
+            } else {
+                log('debugInfo', '❌ 游戏引擎不存在');
+            }
+        }
+
+        // 页面加载时的初始化
+        window.onload = function() {
+            log('buttonInfo', '页面加载完成');
+            log('buttonInfo', '请运行检查来诊断问题');
+        };
+
+        // 监听错误事件
+        window.addEventListener('error', function(event) {
+            log('debugInfo', `❌ 全局错误: ${event.error.message}`);
+        });
+    </script>
+
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>图片信息检查</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .image-info { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .size-warning { color: red; font-weight: bold; }
+        .resolution-warning { color: orange; font-weight: bold; }
+        img { max-width: 200px; max-height: 200px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>图片资源分析</h1>
+    <div id="results"></div>
+    
+    <script>
+        const expectedSizes = {
+            'player_walk_01': { width: 400, height: 600 },
+            'player_walk_02': { width: 400, height: 600 },
+            'player_walk_03': { width: 400, height: 600 },
+            'player_walk_04': { width: 400, height: 600 },
+            'monster_01': { width: 300, height: 450 },
+            'monster_02': { width: 400, height: 600 },
+            'monster_03': { width: 500, height: 750 },
+            'bg_road_01': { width: 1440, height: 2560 },
+            'bg_road_02': { width: 1440, height: 2560 },
+            'bg_road_03': { width: 1440, height: 2560 },
+            'bg_road_04': { width: 1440, height: 2560 },
+            'bg_road_05': { width: 1440, height: 2560 }
+        };
+        
+        const fileSizes = {
+            'bg_road_01.png': 5284763,
+            'bg_road_02.png': 4775007,
+            'bg_road_03.png': 5170819,
+            'bg_road_04.png': 4741903,
+            'bg_road_05.png': 4399176,
+            'monster_01.png': 2884801,
+            'monster_02.png': 3142574,
+            'monster_03.png': 3263623,
+            'player_walk_01.png': 1460627,
+            'player_walk_02.png': 1483339,
+            'player_walk_03.png': 1317052,
+            'player_walk_04.png': 1510685
+        };
+        
+        const results = document.getElementById('results');
+        let totalSize = 0;
+        let issues = [];
+        
+        // 检查文件大小
+        Object.entries(fileSizes).forEach(([filename, size]) => {
+            const sizeMB = (size / 1024 / 1024).toFixed(2);
+            totalSize += size;
+            
+            if (size > 2 * 1024 * 1024) { // 大于2MB
+                issues.push(`${filename}: 文件过大 (${sizeMB}MB)`);
+            }
+        });
+        
+        // 检查图片分辨率
+        Object.entries(expectedSizes).forEach(([name, expected]) => {
+            const img = new Image();
+            img.onload = function() {
+                const actual = { width: this.naturalWidth, height: this.naturalHeight };
+                const expectedStr = `${expected.width}x${expected.height}`;
+                const actualStr = `${actual.width}x${actual.height}`;
+                
+                let status = '✅';
+                if (actual.width !== expected.width || actual.height !== expected.height) {
+                    status = '⚠️';
+                    issues.push(`${name}: 分辨率不匹配 (期望: ${expectedStr}, 实际: ${actualStr})`);
+                }
+                
+                const div = document.createElement('div');
+                div.className = 'image-info';
+                div.innerHTML = `
+                    <h3>${name} ${status}</h3>
+                    <p>期望分辨率: ${expectedStr}</p>
+                    <p>实际分辨率: ${actualStr}</p>
+                    <p>文件大小: ${(fileSizes[name + '.png'] / 1024 / 1024).toFixed(2)}MB</p>
+                    <img src="src/${name}.png" alt="${name}">
+                `;
+                results.appendChild(div);
+            };
+            img.src = `src/${name}.png`;
+        });
+        
+        // 显示总结
+        setTimeout(() => {
+            const summary = document.createElement('div');
+            summary.className = 'image-info';
+            summary.innerHTML = `
+                <h2>总结</h2>
+                <p><strong>总文件大小:</strong> ${(totalSize / 1024 / 1024).toFixed(2)}MB</p>
+                <p><strong>问题数量:</strong> ${issues.length}</p>
+                ${issues.length > 0 ? `
+                    <h3>发现的问题:</h3>
+                    <ul>
+                        ${issues.map(issue => `<li class="${issue.includes('文件过大') ? 'size-warning' : 'resolution-warning'}">${issue}</li>`).join('')}
+                    </ul>
+                ` : '<p>✅ 没有发现明显问题</p>'}
+            `;
+            results.appendChild(summary);
+        }, 2000);
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面加载修复测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top: 4px solid #4ecdc4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+        
+        .status.warning {
+            background-color: #5a4a2d;
+            border: 1px solid #ff9800;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>页面加载修复测试</h1>
+        
+        <div class="test-section">
+            <h2>加载状态监控</h2>
+            <div class="loading-indicator" id="loadingIndicator">
+                <div class="spinner"></div>
+                <span style="margin-left: 15px;">正在加载...</span>
+            </div>
+            <div id="loadingStatus" class="status info">等待开始测试</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试控制</h2>
+            <button onclick="testImageLoading()">测试图片加载</button>
+            <button onclick="testAudioLoading()">测试音频加载</button>
+            <button onclick="testGameInitialization()">测试游戏初始化</button>
+            <button onclick="loadGame()">加载游戏</button>
+            <button onclick="clearLog()">清除日志</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏测试</h2>
+            <div class="game-frame" id="gameFrame">
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">
+                    点击"加载游戏"按钮开始测试
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class LoadingFixTest {
+            constructor() {
+                this.logs = [];
+                this.startTime = Date.now();
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('页面加载修复测试系统初始化完成');
+                this.updateLoadingStatus('系统初始化完成', 'success');
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const elapsed = Date.now() - this.startTime;
+                const logEntry = `[${timestamp}] [+${elapsed}ms] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            updateLoadingStatus(message, type = 'info') {
+                const statusElement = document.getElementById('loadingStatus');
+                const indicatorElement = document.getElementById('loadingIndicator');
+                
+                if (statusElement) {
+                    statusElement.textContent = message;
+                    statusElement.className = 'status ' + type;
+                }
+                
+                if (indicatorElement) {
+                    if (type === 'success') {
+                        indicatorElement.innerHTML = '<span style="color: #4caf50;">✓ 加载完成</span>';
+                    } else if (type === 'error') {
+                        indicatorElement.innerHTML = '<span style="color: #f44336;">✗ 加载失败</span>';
+                    } else if (type === 'warning') {
+                        indicatorElement.innerHTML = '<div class="spinner"></div><span style="margin-left: 15px;">' + message + '</span>';
+                    } else {
+                        indicatorElement.innerHTML = '<div class="spinner"></div><span style="margin-left: 15px;">' + message + '</span>';
+                    }
+                }
+            }
+            
+            async testImageLoading() {
+                this.log('=== 图片加载测试 ===');
+                this.updateLoadingStatus('正在测试图片加载...', 'warning');
+                
+                try {
+                    if (typeof ImageLoader !== 'undefined') {
+                        const imageLoader = new ImageLoader();
+                        this.log('ImageLoader实例创建成功');
+                        
+                        const startTime = Date.now();
+                        await imageLoader.loadAllImages();
+                        const loadTime = Date.now() - startTime;
+                        
+                        this.log(`图片加载完成，耗时: ${loadTime}ms`);
+                        this.log(`加载进度: ${imageLoader.getLoadProgress()}`);
+                        
+                        this.updateLoadingStatus(`图片加载成功 (${loadTime}ms)`, 'success');
+                    } else {
+                        this.log('ImageLoader类未定义');
+                        this.updateLoadingStatus('ImageLoader类未定义', 'error');
+                    }
+                } catch (error) {
+                    this.log('图片加载测试失败: ' + error.message);
+                    this.updateLoadingStatus('图片加载失败: ' + error.message, 'error');
+                }
+            }
+            
+            async testAudioLoading() {
+                this.log('=== 音频加载测试 ===');
+                this.updateLoadingStatus('正在测试音频加载...', 'warning');
+                
+                try {
+                    if (typeof AudioManager !== 'undefined') {
+                        const audioManager = new AudioManager();
+                        this.log('AudioManager实例创建成功');
+                        
+                        const startTime = Date.now();
+                        const result = await audioManager.initialize();
+                        const loadTime = Date.now() - startTime;
+                        
+                        this.log(`音频初始化完成，耗时: ${loadTime}ms，结果: ${result}`);
+                        this.log(`音频状态: ${JSON.stringify(audioManager.getStatus())}`);
+                        
+                        this.updateLoadingStatus(`音频加载完成 (${loadTime}ms)`, 'success');
+                    } else {
+                        this.log('AudioManager类未定义');
+                        this.updateLoadingStatus('AudioManager类未定义', 'error');
+                    }
+                } catch (error) {
+                    this.log('音频加载测试失败: ' + error.message);
+                    this.updateLoadingStatus('音频加载失败: ' + error.message, 'error');
+                }
+            }
+            
+            async testGameInitialization() {
+                this.log('=== 游戏初始化测试 ===');
+                this.updateLoadingStatus('正在测试游戏初始化...', 'warning');
+                
+                try {
+                    if (typeof GameEngine !== 'undefined') {
+                        this.log('GameEngine类可用');
+                        
+                        const startTime = Date.now();
+                        const gameEngine = new GameEngine();
+                        const initTime = Date.now() - startTime;
+                        
+                        this.log(`游戏引擎创建完成，耗时: ${initTime}ms`);
+                        
+                        // 等待初始化完成
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                        this.log('游戏初始化测试完成');
+                        this.updateLoadingStatus(`游戏初始化完成 (${initTime}ms)`, 'success');
+                    } else {
+                        this.log('GameEngine类未定义');
+                        this.updateLoadingStatus('GameEngine类未定义', 'error');
+                    }
+                } catch (error) {
+                    this.log('游戏初始化测试失败: ' + error.message);
+                    this.updateLoadingStatus('游戏初始化失败: ' + error.message, 'error');
+                }
+            }
+            
+            loadGame() {
+                this.log('开始加载游戏...');
+                this.updateLoadingStatus('正在加载游戏...', 'warning');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    if (gameFrame) {
+                        // 创建iframe加载游戏
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'index.html';
+                        
+                        const loadStartTime = Date.now();
+                        
+                        iframe.onload = () => {
+                            const loadTime = Date.now() - loadStartTime;
+                            this.log(`游戏页面加载完成，耗时: ${loadTime}ms`);
+                            this.updateLoadingStatus(`游戏加载完成 (${loadTime}ms)`, 'success');
+                        };
+                        
+                        iframe.onerror = () => {
+                            this.log('游戏页面加载失败');
+                            this.updateLoadingStatus('游戏加载失败', 'error');
+                        };
+                        
+                        // 清空容器并添加iframe
+                        gameFrame.innerHTML = '';
+                        gameFrame.appendChild(iframe);
+                        
+                        this.log('游戏iframe已创建');
+                    } else {
+                        throw new Error('游戏容器不存在');
+                    }
+                } catch (error) {
+                    this.log('加载游戏时出错: ' + error.message);
+                    this.updateLoadingStatus('加载游戏失败: ' + error.message, 'error');
+                }
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清除');
+            }
+        }
+        
+        // 全局变量
+        let loadingFixTest = null;
+        
+        // 全局函数
+        function testImageLoading() {
+            if (loadingFixTest) {
+                loadingFixTest.testImageLoading();
+            }
+        }
+        
+        function testAudioLoading() {
+            if (loadingFixTest) {
+                loadingFixTest.testAudioLoading();
+            }
+        }
+        
+        function testGameInitialization() {
+            if (loadingFixTest) {
+                loadingFixTest.testGameInitialization();
+            }
+        }
+        
+        function loadGame() {
+            if (loadingFixTest) {
+                loadingFixTest.loadGame();
+            }
+        }
+        
+        function clearLog() {
+            if (loadingFixTest) {
+                loadingFixTest.clearLog();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadingFixTest = new LoadingFixTest();
+        });
+        
+        // 捕获全局错误
+        window.addEventListener('error', (event) => {
+            console.error('全局错误:', event.error);
+            if (loadingFixTest) {
+                loadingFixTest.log('全局错误: ' + event.error.message);
+            }
+        });
+        
+        // 捕获未处理的Promise拒绝
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('未处理的Promise拒绝:', event.reason);
+            if (loadingFixTest) {
+                loadingFixTest.log('Promise拒绝: ' + event.reason);
+            }
+        });
+    </script>
+    
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>

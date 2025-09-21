@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件加载测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .success {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📁 文件加载测试</h1>
+    
+    <div class="test-section">
+        <h2>🔍 检查文件加载状态</h2>
+        <div class="test-info" id="fileStatus"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 测试游戏初始化</h2>
+        <div class="test-info" id="gameStatus"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+        }
+
+        function checkFileLoading() {
+            log('fileStatus', '=== 检查文件加载状态 ===');
+            
+            const files = [
+                'config.js',
+                'imageLoader.js', 
+                'audioManager.js',
+                'camera.js',
+                'gameObjects.js',
+                'inputHandler.js',
+                'uiManager.js',
+                'gameEngine.js'
+            ];
+            
+            files.forEach(file => {
+                // 检查文件是否加载成功
+                const script = document.querySelector(`script[src="${file}"]`);
+                if (script) {
+                    log('fileStatus', `✅ ${file} 已加载`);
+                } else {
+                    log('fileStatus', `❌ ${file} 未找到`);
+                }
+            });
+        }
+
+        function checkGameInitialization() {
+            log('gameStatus', '=== 检查游戏初始化 ===');
+            
+            // 检查各个类是否存在
+            const classes = [
+                'CONFIG',
+                'ImageLoader',
+                'AudioManagerSingleton',
+                'Camera',
+                'GameObject',
+                'Player',
+                'Bullet',
+                'Enemy',
+                'InputManager',
+                'UIManager',
+                'UIManagerSingleton',
+                'GameEngine'
+            ];
+            
+            classes.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    log('gameStatus', `✅ ${className} 存在`);
+                } else {
+                    log('gameStatus', `❌ ${className} 不存在`);
+                }
+            });
+            
+            // 检查gameEngine
+            if (typeof gameEngine !== 'undefined') {
+                log('gameStatus', `✅ gameEngine 存在`);
+                if (gameEngine) {
+                    log('gameStatus', `游戏状态: ${gameEngine.gameState}`);
+                } else {
+                    log('gameStatus', `gameEngine 为 null`);
+                }
+            } else {
+                log('gameStatus', `❌ gameEngine 不存在`);
+            }
+        }
+
+        // 页面加载完成后检查
+        window.onload = function() {
+            checkFileLoading();
+            checkGameInitialization();
+        };
+
+        // 监听错误
+        window.addEventListener('error', function(event) {
+            log('gameStatus', `❌ 错误: ${event.error.message}`);
+        });
+    </script>
+
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>
+
+
+

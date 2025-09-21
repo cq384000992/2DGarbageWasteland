@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开始游戏按钮测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        .success {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+        .test-button {
+            background-color: #ff6b6b;
+            color: white;
+            font-size: 16px;
+            padding: 15px 30px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 开始游戏按钮测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 测试说明</h2>
+        <div class="test-info">
+            这个测试页面将帮助诊断开始游戏按钮的问题：
+            
+            1. 检查按钮是否存在
+            2. 检查按钮是否可点击
+            3. 检查事件监听器是否正常
+            4. 检查游戏引擎是否正常初始化
+            5. 测试按钮点击功能
+            
+            请按照提示逐步测试，以确定是浏览器问题还是游戏代码问题。
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 基础检查</h2>
+        <button onclick="checkBasicElements()">检查基础元素</button>
+        <button onclick="checkGameEngine()">检查游戏引擎</button>
+        <button onclick="checkEventListeners()">检查事件监听器</button>
+        <div class="test-info" id="basicInfo"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 按钮功能测试</h2>
+        <button onclick="testButtonClick()">测试按钮点击</button>
+        <button onclick="testManualStart()">手动开始游戏</button>
+        <button onclick="simulateClick()">模拟点击事件</button>
+        <div class="test-info" id="buttonInfo"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🌐 浏览器兼容性测试</h2>
+        <button onclick="checkBrowserInfo()">检查浏览器信息</button>
+        <button onclick="testJavaScript()">测试JavaScript功能</button>
+        <button onclick="testDOM()">测试DOM操作</button>
+        <div class="test-info" id="browserInfo"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎮 实际游戏测试</h2>
+        <button class="test-button" onclick="startActualGame()">开始实际游戏测试</button>
+        <div class="test-info" id="gameInfo"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkBasicElements() {
+            log('basicInfo', '=== 检查基础元素 ===');
+            
+            // 检查开始按钮
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                log('basicInfo', '✅ 开始按钮存在');
+                log('basicInfo', `按钮ID: ${startButton.id}`);
+                log('basicInfo', `按钮文本: ${startButton.textContent}`);
+                log('basicInfo', `按钮类型: ${startButton.type}`);
+                log('basicInfo', `按钮可见性: ${startButton.style.display !== 'none' ? '可见' : '不可见'}`);
+                log('basicInfo', `按钮可点击性: ${!startButton.disabled ? '可点击' : '不可点击'}`);
+                log('basicInfo', `按钮位置: ${startButton.offsetLeft}, ${startButton.offsetTop}`);
+                log('basicInfo', `按钮尺寸: ${startButton.offsetWidth}x${startButton.offsetHeight}`);
+            } else {
+                log('basicInfo', '❌ 开始按钮不存在');
+            }
+            
+            // 检查开始界面
+            const startScreen = document.getElementById('startScreen');
+            if (startScreen) {
+                log('basicInfo', '✅ 开始界面存在');
+                log('basicInfo', `界面显示状态: ${startScreen.style.display}`);
+            } else {
+                log('basicInfo', '❌ 开始界面不存在');
+            }
+        }
+
+        function checkGameEngine() {
+            log('basicInfo', '=== 检查游戏引擎 ===');
+            
+            if (typeof gameEngine !== 'undefined') {
+                log('basicInfo', '✅ gameEngine 变量存在');
+                if (gameEngine) {
+                    log('basicInfo', '✅ gameEngine 实例存在');
+                    log('basicInfo', `游戏状态: ${gameEngine.gameState}`);
+                    log('basicInfo', `是否运行: ${gameEngine.isRunning}`);
+                    log('basicInfo', `当前关卡: ${gameEngine.currentLevel}`);
+                } else {
+                    log('basicInfo', '❌ gameEngine 为 null');
+                }
+            } else {
+                log('basicInfo', '❌ gameEngine 变量不存在');
+            }
+            
+            // 检查必要的类
+            const classes = ['CONFIG', 'GameEngine', 'UIManager', 'Player'];
+            classes.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    log('basicInfo', `✅ ${className} 类存在`);
+                } else {
+                    log('basicInfo', `❌ ${className} 类不存在`);
+                }
+            });
+        }
+
+        function checkEventListeners() {
+            log('basicInfo', '=== 检查事件监听器 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('basicInfo', '❌ 开始按钮不存在，无法检查事件监听器');
+                return;
+            }
+            
+            // 检查UI管理器
+            if (typeof gameEngine !== 'undefined' && gameEngine && gameEngine.uiManager) {
+                const uiManager = gameEngine.uiManager;
+                log('basicInfo', '✅ UI管理器存在');
+                log('basicInfo', `开始回调: ${typeof uiManager.onGameStart}`);
+                log('basicInfo', `开始按钮处理器: ${typeof uiManager.startButtonHandler}`);
+                
+                if (uiManager.startButtonHandler) {
+                    log('basicInfo', '✅ 开始按钮事件处理器存在');
+                } else {
+                    log('basicInfo', '❌ 开始按钮事件处理器不存在');
+                }
+            } else {
+                log('basicInfo', '❌ UI管理器不存在');
+            }
+        }
+
+        function testButtonClick() {
+            log('buttonInfo', '=== 测试按钮点击 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('buttonInfo', '❌ 开始按钮不存在');
+                return;
+            }
+            
+            log('buttonInfo', '模拟点击开始按钮...');
+            try {
+                startButton.click();
+                log('buttonInfo', '✅ 按钮点击成功');
+                
+                // 检查游戏状态是否改变
+                if (typeof gameEngine !== 'undefined' && gameEngine) {
+                    log('buttonInfo', `游戏状态: ${gameEngine.gameState}`);
+                    log('buttonInfo', `是否运行: ${gameEngine.isRunning}`);
+                }
+            } catch (error) {
+                log('buttonInfo', `❌ 按钮点击失败: ${error.message}`);
+            }
+        }
+
+        function testManualStart() {
+            log('buttonInfo', '=== 手动开始游戏 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('buttonInfo', '调用startGame()方法...');
+                try {
+                    gameEngine.startGame();
+                    log('buttonInfo', '✅ startGame()调用成功');
+                    log('buttonInfo', `游戏状态: ${gameEngine.gameState}`);
+                    log('buttonInfo', `是否运行: ${gameEngine.isRunning}`);
+                } catch (error) {
+                    log('buttonInfo', `❌ startGame()调用失败: ${error.message}`);
+                }
+            } else {
+                log('buttonInfo', '❌ 游戏引擎不存在');
+            }
+        }
+
+        function simulateClick() {
+            log('buttonInfo', '=== 模拟点击事件 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('buttonInfo', '❌ 开始按钮不存在');
+                return;
+            }
+            
+            // 创建并触发点击事件
+            const clickEvent = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+            });
+            
+            log('buttonInfo', '触发点击事件...');
+            try {
+                startButton.dispatchEvent(clickEvent);
+                log('buttonInfo', '✅ 点击事件触发成功');
+            } catch (error) {
+                log('buttonInfo', `❌ 点击事件触发失败: ${error.message}`);
+            }
+        }
+
+        function checkBrowserInfo() {
+            log('browserInfo', '=== 检查浏览器信息 ===');
+            
+            log('browserInfo', `用户代理: ${navigator.userAgent}`);
+            log('browserInfo', `浏览器语言: ${navigator.language}`);
+            log('browserInfo', `屏幕分辨率: ${screen.width}x${screen.height}`);
+            log('browserInfo', `窗口大小: ${window.innerWidth}x${window.innerHeight}`);
+            log('browserInfo', `页面加载时间: ${performance.now().toFixed(2)}ms`);
+            log('browserInfo', `DOM状态: ${document.readyState}`);
+        }
+
+        function testJavaScript() {
+            log('browserInfo', '=== 测试JavaScript功能 ===');
+            
+            try {
+                // 测试基本JavaScript功能
+                const testObj = { test: 'value' };
+                const testArray = [1, 2, 3];
+                const testFunction = () => 'test';
+                
+                log('browserInfo', '✅ 基本JavaScript功能正常');
+                
+                // 测试事件处理
+                const testElement = document.createElement('div');
+                let eventTriggered = false;
+                testElement.addEventListener('click', () => {
+                    eventTriggered = true;
+                });
+                testElement.click();
+                
+                if (eventTriggered) {
+                    log('browserInfo', '✅ 事件处理功能正常');
+                } else {
+                    log('browserInfo', '❌ 事件处理功能异常');
+                }
+                
+            } catch (error) {
+                log('browserInfo', `❌ JavaScript功能异常: ${error.message}`);
+            }
+        }
+
+        function testDOM() {
+            log('browserInfo', '=== 测试DOM操作 ===');
+            
+            try {
+                // 测试DOM查询
+                const testElement = document.getElementById('startButton');
+                if (testElement) {
+                    log('browserInfo', '✅ DOM查询功能正常');
+                } else {
+                    log('browserInfo', '❌ DOM查询功能异常');
+                }
+                
+                // 测试DOM操作
+                const testDiv = document.createElement('div');
+                testDiv.id = 'testDiv';
+                document.body.appendChild(testDiv);
+                document.body.removeChild(testDiv);
+                log('browserInfo', '✅ DOM操作功能正常');
+                
+            } catch (error) {
+                log('browserInfo', `❌ DOM操作异常: ${error.message}`);
+            }
+        }
+
+        function startActualGame() {
+            log('gameInfo', '=== 开始实际游戏测试 ===');
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('gameInfo', '游戏引擎存在，开始测试...');
+                
+                // 检查游戏状态
+                log('gameInfo', `当前游戏状态: ${gameEngine.gameState}`);
+                
+                if (gameEngine.gameState === 'start') {
+                    log('gameInfo', '游戏处于开始状态，尝试开始游戏...');
+                    try {
+                        gameEngine.startGame();
+                        log('gameInfo', '✅ 游戏开始成功');
+                        log('gameInfo', `新游戏状态: ${gameEngine.gameState}`);
+                        log('gameInfo', `游戏是否运行: ${gameEngine.isRunning}`);
+                    } catch (error) {
+                        log('gameInfo', `❌ 游戏开始失败: ${error.message}`);
+                    }
+                } else {
+                    log('gameInfo', `游戏不在开始状态，当前状态: ${gameEngine.gameState}`);
+                }
+            } else {
+                log('gameInfo', '❌ 游戏引擎不存在，无法开始游戏');
+            }
+        }
+
+        // 页面加载完成
+        window.onload = function() {
+            log('basicInfo', '页面加载完成，请开始测试');
+        };
+
+        // 监听错误
+        window.addEventListener('error', function(event) {
+            log('basicInfo', `❌ 全局错误: ${event.error.message}`);
+        });
+    </script>
+
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>末日垃圾场游戏 - 调试版</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .debug-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            max-width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-info" id="debugInfo">
+        调试信息加载中...
+    </div>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1440" height="2560"></canvas>
+        
+        <!-- 游戏UI -->
+        <div class="ui-overlay">
+            <!-- 生命值显示 -->
+            <div class="health-bar">
+                <div class="health-fill" id="healthFill"></div>
+                <span class="health-text" id="healthText">血量: 100/100</span>
+            </div>
+            
+            <!-- 信息面板 -->
+            <div class="info-panel">
+                <!-- 分数显示 -->
+                <div class="info-card score-display">
+                    <span class="label">分数:</span>
+                    <span id="scoreValue">0</span>
+                </div>
+                
+                <!-- 关卡显示 -->
+                <div class="info-card level-display">
+                    <span class="label">关卡:</span>
+                    <span id="levelValue">1</span>
+                </div>
+                
+                <!-- 时间显示 -->
+                <div class="info-card time-display">
+                    <span class="label">时间:</span>
+                    <span id="timeValue">0</span>
+                </div>
+                
+                <!-- 关卡进度显示 -->
+                <div class="info-card progress-display">
+                    <span class="label">进度:</span>
+                    <span id="progressValue">0%</span>
+                </div>
+                
+                <!-- 剩余怪物数量显示 -->
+                <div class="info-card monster-count-display">
+                    <span class="label">剩余怪物:</span>
+                    <span id="monsterCountValue">0</span>
+                </div>
+                
+                <!-- 关卡进度条 -->
+                <div class="info-card">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <!-- 音频控制 -->
+                <div class="audio-controls">
+                    <button id="audioToggle" class="audio-button" aria-label="切换音频开关" title="点击切换音频开关">🔊</button>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider" aria-label="音量控制" title="拖动调节音量">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏开始界面 -->
+        <div class="start-screen" id="startScreen">
+            <h1>末日垃圾场</h1>
+            <p>一个基于HTML5 Canvas的竖屏跑酷射击游戏</p>
+            <button id="startButton" aria-label="开始游戏" title="点击开始游戏">开始游戏</button>
+        </div>
+        
+        <!-- 游戏结束界面 -->
+        <div class="game-over-screen" id="gameOverScreen" style="display: none;">
+            <h2>游戏结束</h2>
+            <p>最终分数: <span id="finalScore">0</span></p>
+            <p>到达关卡: <span id="finalLevel">1</span></p>
+            <button id="restartButton" aria-label="重新开始游戏" title="点击重新开始游戏">重新开始</button>
+        </div>
+        
+        <!-- 关卡完成界面 -->
+        <div class="level-complete-screen" id="levelCompleteScreen" style="display: none;">
+            <h2>关卡完成！</h2>
+            <p>准备进入下一关...</p>
+            <button id="nextLevelButton" aria-label="进入下一关" title="点击进入下一关">下一关</button>
+        </div>
+    </div>
+    
+    <!-- 调试脚本 -->
+    <script>
+        // 调试信息显示
+        function updateDebugInfo(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            if (debugInfo) {
+                const timestamp = new Date().toLocaleTimeString();
+                debugInfo.innerHTML += '<br>[' + timestamp + '] ' + message;
+                console.log('[DEBUG]', message);
+            }
+        }
+        
+        // 错误捕获
+        window.addEventListener('error', function(event) {
+            updateDebugInfo('错误: ' + event.error.message);
+            console.error('页面错误:', event.error);
+        });
+        
+        // Promise拒绝捕获
+        window.addEventListener('unhandledrejection', function(event) {
+            updateDebugInfo('Promise拒绝: ' + event.reason);
+            console.error('Promise拒绝:', event.reason);
+        });
+        
+        // 页面加载状态
+        updateDebugInfo('页面开始加载...');
+        
+        // 检查DOM状态
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDebugInfo('DOM加载完成');
+            
+            // 检查关键元素
+            const startButton = document.getElementById('startButton');
+            const canvas = document.getElementById('gameCanvas');
+            
+            if (startButton) {
+                updateDebugInfo('开始按钮找到');
+            } else {
+                updateDebugInfo('开始按钮未找到！');
+            }
+            
+            if (canvas) {
+                updateDebugInfo('Canvas元素找到');
+            } else {
+                updateDebugInfo('Canvas元素未找到！');
+            }
+        });
+        
+        // 页面完全加载
+        window.addEventListener('load', function() {
+            updateDebugInfo('页面完全加载完成');
+        });
+    </script>
+    
+    <!-- 游戏脚本 - 带错误处理 -->
+    <script>
+        updateDebugInfo('开始加载游戏脚本...');
+    </script>
+    
+    <script src="config.js" onload="updateDebugInfo('config.js 加载成功')" onerror="updateDebugInfo('config.js 加载失败！')"></script>
+    <script src="imageLoader.js" onload="updateDebugInfo('imageLoader.js 加载成功')" onerror="updateDebugInfo('imageLoader.js 加载失败！')"></script>
+    <script src="audioManager.js" onload="updateDebugInfo('audioManager.js 加载成功')" onerror="updateDebugInfo('audioManager.js 加载失败！')"></script>
+    <script src="camera.js" onload="updateDebugInfo('camera.js 加载成功')" onerror="updateDebugInfo('camera.js 加载失败！')"></script>
+    <script src="gameObjects.js" onload="updateDebugInfo('gameObjects.js 加载成功')" onerror="updateDebugInfo('gameObjects.js 加载失败！')"></script>
+    <script src="inputHandler.js" onload="updateDebugInfo('inputHandler.js 加载成功')" onerror="updateDebugInfo('inputHandler.js 加载失败！')"></script>
+    <script src="uiManager.js" onload="updateDebugInfo('uiManager.js 加载成功')" onerror="updateDebugInfo('uiManager.js 加载失败！')"></script>
+    <script src="gameEngine.js" onload="updateDebugInfo('gameEngine.js 加载成功')" onerror="updateDebugInfo('gameEngine.js 加载失败！')"></script>
+    
+    <script>
+        // 所有脚本加载完成后的初始化
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                updateDebugInfo('尝试初始化游戏...');
+                
+                try {
+                    // 检查游戏引擎是否可用
+                    if (typeof GameEngine !== 'undefined') {
+                        updateDebugInfo('GameEngine类可用');
+                        
+                        // 尝试创建游戏实例
+                        const gameEngine = new GameEngine();
+                        updateDebugInfo('游戏引擎实例创建成功');
+                        
+                        // 尝试初始化游戏
+                        gameEngine.initialize().then(() => {
+                            updateDebugInfo('游戏初始化成功！');
+                        }).catch((error) => {
+                            updateDebugInfo('游戏初始化失败: ' + error.message);
+                            console.error('游戏初始化失败:', error);
+                        });
+                        
+                    } else {
+                        updateDebugInfo('GameEngine类不可用！');
+                    }
+                } catch (error) {
+                    updateDebugInfo('游戏初始化异常: ' + error.message);
+                    console.error('游戏初始化异常:', error);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

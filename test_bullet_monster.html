@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子弹和怪物测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .fail {
+            background-color: #5a2d2d;
+            border-left: 4px solid #f44336;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 子弹和怪物系统测试</h1>
+    
+    <div class="test-section">
+        <h2>📊 怪物尺寸分析</h2>
+        <div class="test-result info">
+            <strong>BarrelMonster:</strong> 300×450px (135,000 平方像素)
+        </div>
+        <div class="test-result info">
+            <strong>UFOTurret:</strong> 400×600px (240,000 平方像素)
+        </div>
+        <div class="test-result info">
+            <strong>GiantMelee:</strong> 500×750px (375,000 平方像素)
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 子弹系统测试</h2>
+        <button onclick="testBulletSystem()">测试子弹系统</button>
+        <div id="bullet-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>👹 怪物生成测试</h2>
+        <button onclick="testMonsterGeneration()">测试怪物生成</button>
+        <div id="monster-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <button onclick="clearLog()">清空日志</button>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // 模拟配置
+        const CONFIG = {
+            PLAYER: {
+                BULLET_SPEED: 800,
+                BULLET_WIDTH: 20,
+                BULLET_HEIGHT: 50,
+                MOVE_SPEED: 390
+            },
+            ENEMIES: {
+                BARREL_MONSTER: { WIDTH: 300, HEIGHT: 450 },
+                UFO_TURRET: { WIDTH: 400, HEIGHT: 600 },
+                GIANT_MELEE: { WIDTH: 500, HEIGHT: 750 }
+            },
+            GAME: {
+                CANVAS_WIDTH: 1440,
+                CANVAS_HEIGHT: 2560
+            }
+        };
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function testBulletSystem() {
+            log('🎯 开始测试子弹系统...');
+            
+            // 测试子弹速度是否固定
+            const bulletSpeed = CONFIG.PLAYER.BULLET_SPEED;
+            log(`子弹速度: ${bulletSpeed} 像素/秒`);
+            
+            // 测试子弹边界检查
+            const bulletHeight = CONFIG.PLAYER.BULLET_HEIGHT;
+            const destroyY = -bulletHeight - 2000;
+            log(`子弹销毁Y坐标: ${destroyY} (向上2000像素缓冲)`);
+            
+            // 模拟子弹移动
+            let bulletY = 1000;
+            let frames = 0;
+            const deltaTime = 1/60; // 60FPS
+            
+            while (bulletY > destroyY && frames < 1000) {
+                bulletY += -bulletSpeed * deltaTime;
+                frames++;
+            }
+            
+            log(`子弹移动测试: ${frames}帧后到达Y=${bulletY.toFixed(1)}`);
+            
+            if (bulletY <= destroyY) {
+                log('✅ 子弹边界检查正常');
+                document.getElementById('bullet-results').innerHTML = 
+                    '<div class="test-result pass">✅ 子弹系统正常：速度固定，边界检查合理</div>';
+            } else {
+                log('❌ 子弹边界检查异常');
+                document.getElementById('bullet-results').innerHTML = 
+                    '<div class="test-result fail">❌ 子弹系统异常：边界检查可能有问题</div>';
+            }
+        }
+
+        function testMonsterGeneration() {
+            log('👹 开始测试怪物生成系统...');
+            
+            // 模拟怪物生成
+            const playAreaLeft = 360;
+            const playAreaRight = 1080;
+            const spawnWidth = 620; // 720 - 100
+            const spawnLeft = 410; // 360 + 50
+            
+            log(`生成区域: X=${spawnLeft} 到 ${spawnLeft + spawnWidth} (宽度${spawnWidth})`);
+            
+            // 测试不同怪物组合的间距
+            const testCases = [
+                { name: 'GiantMelee + GiantMelee', width1: 500, width2: 500, expected: 580 },
+                { name: 'GiantMelee + UFOTurret', width1: 500, width2: 400, expected: 540 },
+                { name: 'UFOTurret + UFOTurret', width1: 400, width2: 400, expected: 460 },
+                { name: 'BarrelMonster + GiantMelee', width1: 300, width2: 500, expected: 490 },
+                { name: 'BarrelMonster + UFOTurret', width1: 300, width2: 400, expected: 400 },
+                { name: 'BarrelMonster + BarrelMonster', width1: 300, width2: 300, expected: 340 }
+            ];
+            
+            let allPassed = true;
+            let results = '';
+            
+            testCases.forEach(testCase => {
+                const maxWidth = Math.max(testCase.width1, testCase.width2);
+                let minDistance;
+                
+                if (maxWidth >= 500) {
+                    minDistance = (testCase.width1 + testCase.width2) / 2 + 80;
+                } else if (maxWidth >= 400) {
+                    minDistance = (testCase.width1 + testCase.width2) / 2 + 60;
+                } else {
+                    minDistance = (testCase.width1 + testCase.width2) / 2 + 40;
+                }
+                
+                const passed = minDistance === testCase.expected;
+                allPassed = allPassed && passed;
+                
+                log(`${testCase.name}: 计算=${minDistance}, 预期=${testCase.expected}, ${passed ? '✅' : '❌'}`);
+                
+                results += `<div class="test-result ${passed ? 'pass' : 'fail'}">
+                    ${testCase.name}: ${minDistance}px ${passed ? '✅' : '❌'}
+                </div>`;
+            });
+            
+            // 测试空间是否足够
+            const maxRequiredSpace = 580; // GiantMelee + GiantMelee
+            const availableSpace = spawnWidth;
+            
+            log(`最大需求空间: ${maxRequiredSpace}px`);
+            log(`可用空间: ${availableSpace}px`);
+            
+            if (availableSpace >= maxRequiredSpace) {
+                log(`✅ 可用空间${availableSpace}px >= 最大需求${maxRequiredSpace}px`);
+                results += '<div class="test-result pass">✅ 空间充足：可以容纳最大怪物组合</div>';
+            } else {
+                log(`❌ 可用空间${availableSpace}px < 最大需求${maxRequiredSpace}px`);
+                results += '<div class="test-result fail">❌ 空间不足：无法容纳最大怪物组合</div>';
+                allPassed = false;
+            }
+            
+            document.getElementById('monster-results').innerHTML = results;
+            
+            if (allPassed) {
+                log('✅ 怪物生成系统测试通过');
+            } else {
+                log('❌ 怪物生成系统测试失败');
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🚀 测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>

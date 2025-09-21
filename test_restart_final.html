@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重启功能测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            min-height: 44px;
+            min-width: 120px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>游戏重启功能测试</h1>
+        
+        <div class="test-section">
+            <h2>测试说明</h2>
+            <p>这个测试页面用于验证游戏重启功能是否正常工作。</p>
+            <ol>
+                <li>点击"开始游戏"按钮启动游戏</li>
+                <li>等待游戏结束（或手动结束）</li>
+                <li>点击"重新开始"按钮</li>
+                <li>验证游戏是否可以重新开始</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏控制</h2>
+            <button onclick="startGame()">开始游戏</button>
+            <button onclick="endGame()">结束游戏</button>
+            <button onclick="restartGame()">重新开始</button>
+            <button onclick="clearLog()">清除日志</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试日志</h2>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏状态</h2>
+            <div id="gameStatus" class="status info">游戏未启动</div>
+        </div>
+    </div>
+
+    <script>
+        class RestartTest {
+            constructor() {
+                this.gameEngine = null;
+                this.gameState = 'stopped';
+                this.logs = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('测试系统初始化完成');
+                this.updateGameStatus();
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            updateGameStatus() {
+                const statusElement = document.getElementById('gameStatus');
+                if (statusElement) {
+                    let statusText = '';
+                    let statusClass = '';
+                    
+                    switch (this.gameState) {
+                        case 'stopped':
+                            statusText = '游戏未启动';
+                            statusClass = 'status info';
+                            break;
+                        case 'starting':
+                            statusText = '游戏启动中...';
+                            statusClass = 'status info';
+                            break;
+                        case 'running':
+                            statusText = '游戏运行中';
+                            statusClass = 'status success';
+                            break;
+                        case 'ended':
+                            statusText = '游戏已结束';
+                            statusClass = 'status error';
+                            break;
+                        case 'restarting':
+                            statusText = '游戏重启中...';
+                            statusClass = 'status info';
+                            break;
+                    }
+                    
+                    statusElement.textContent = statusText;
+                    statusElement.className = statusClass;
+                }
+            }
+            
+            async startGame() {
+                this.log('开始启动游戏...');
+                this.gameState = 'starting';
+                this.updateGameStatus();
+                
+                try {
+                    // 检查游戏引擎是否可用
+                    if (typeof GameEngine === 'undefined') {
+                        throw new Error('GameEngine类不可用');
+                    }
+                    
+                    // 如果已有游戏引擎实例，先销毁
+                    if (this.gameEngine) {
+                        this.log('销毁现有游戏引擎实例');
+                        this.gameEngine.destroy();
+                        this.gameEngine = null;
+                    }
+                    
+                    // 创建新的游戏引擎实例
+                    this.log('创建新的游戏引擎实例');
+                    this.gameEngine = new GameEngine();
+                    
+                    // 初始化游戏
+                    this.log('初始化游戏引擎...');
+                    await this.gameEngine.initialize();
+                    
+                    this.gameState = 'running';
+                    this.updateGameStatus();
+                    this.log('游戏启动成功！');
+                    
+                } catch (error) {
+                    this.log('游戏启动失败: ' + error.message);
+                    console.error('游戏启动失败:', error);
+                    this.gameState = 'stopped';
+                    this.updateGameStatus();
+                }
+            }
+            
+            endGame() {
+                this.log('手动结束游戏...');
+                
+                if (this.gameEngine) {
+                    try {
+                        // 模拟游戏结束
+                        this.gameEngine.gameOver();
+                        this.gameState = 'ended';
+                        this.updateGameStatus();
+                        this.log('游戏已结束');
+                    } catch (error) {
+                        this.log('结束游戏时出错: ' + error.message);
+                        console.error('结束游戏时出错:', error);
+                    }
+                } else {
+                    this.log('没有运行中的游戏实例');
+                }
+            }
+            
+            restartGame() {
+                this.log('开始重启游戏...');
+                this.gameState = 'restarting';
+                this.updateGameStatus();
+                
+                if (this.gameEngine) {
+                    try {
+                        // 调用游戏引擎的重启方法
+                        this.gameEngine.restartGame();
+                        
+                        this.gameState = 'stopped';
+                        this.updateGameStatus();
+                        this.log('游戏重启完成，等待用户点击开始按钮');
+                        
+                    } catch (error) {
+                        this.log('重启游戏时出错: ' + error.message);
+                        console.error('重启游戏时出错:', error);
+                        this.gameState = 'ended';
+                        this.updateGameStatus();
+                    }
+                } else {
+                    this.log('没有可重启的游戏实例');
+                    this.gameState = 'stopped';
+                    this.updateGameStatus();
+                }
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清除');
+            }
+        }
+        
+        // 全局变量
+        let restartTest = null;
+        
+        // 全局函数
+        function startGame() {
+            if (restartTest) {
+                restartTest.startGame();
+            }
+        }
+        
+        function endGame() {
+            if (restartTest) {
+                restartTest.endGame();
+            }
+        }
+        
+        function restartGame() {
+            if (restartTest) {
+                restartTest.restartGame();
+            }
+        }
+        
+        function clearLog() {
+            if (restartTest) {
+                restartTest.clearLog();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            restartTest = new RestartTest();
+        });
+        
+        // 捕获全局错误
+        window.addEventListener('error', (event) => {
+            console.error('全局错误:', event.error);
+            if (restartTest) {
+                restartTest.log('全局错误: ' + event.error.message);
+            }
+        });
+        
+        // 捕获未处理的Promise拒绝
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('未处理的Promise拒绝:', event.reason);
+            if (restartTest) {
+                restartTest.log('Promise拒绝: ' + event.reason);
+            }
+        });
+    </script>
+    
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>

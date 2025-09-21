@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏问题调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        .success {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+        .log {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 游戏问题调试工具</h1>
+    
+    <div class="test-section">
+        <h2>📋 问题列表</h2>
+        <div class="test-info">
+            <strong class="error">❌ 问题1: 重新开始按钮无法点击</strong><br>
+            现象: 游戏结束后，点击"重新开始"按钮无响应<br><br>
+            
+            <strong class="error">❌ 问题2: 子弹射程问题</strong><br>
+            现象: 子弹射程随游戏进行越来越短，最终无法射击<br><br>
+            
+            <strong class="warning">⚠️ 调试目标</strong><br>
+            1. 验证重新开始按钮的事件监听器是否正确设置<br>
+            2. 验证子弹的创建、更新、销毁逻辑<br>
+            3. 检查游戏状态重置逻辑
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 问题1: 重新开始按钮调试</h2>
+        <button onclick="testRestartButton()">测试重新开始按钮</button>
+        <button onclick="checkEventListeners()">检查事件监听器</button>
+        <div class="log" id="restartLog"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 问题2: 子弹射程调试</h2>
+        <button onclick="testBulletRange()">测试子弹射程</button>
+        <button onclick="simulateBulletLifecycle()">模拟子弹生命周期</button>
+        <div class="log" id="bulletLog"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 综合测试</h2>
+        <button onclick="runFullTest()">运行完整测试</button>
+        <button onclick="clearLogs()">清空日志</button>
+        <div class="log" id="fullLog"></div>
+    </div>
+
+    <script>
+        // 模拟游戏配置
+        const CONFIG = {
+            PLAYER: {
+                START_X: 720,
+                START_Y: 1280,
+                MOVE_SPEED: 780,
+                BULLET_SPEED: 2400,
+                BULLET_HEIGHT: 50,
+                SHOOT_INTERVAL: 1667
+            },
+            GAME: {
+                CANVAS_WIDTH: 1440,
+                CANVAS_HEIGHT: 2560
+            }
+        };
+
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function testRestartButton() {
+            log('restartLog', '=== 测试重新开始按钮 ===');
+            
+            // 检查按钮是否存在
+            const restartButton = document.getElementById('restartButton');
+            if (!restartButton) {
+                log('restartLog', '❌ 错误: 找不到重新开始按钮');
+                return;
+            }
+            
+            log('restartLog', '✅ 重新开始按钮存在');
+            
+            // 检查按钮是否可见
+            const isVisible = restartButton.style.display !== 'none' && 
+                             restartButton.offsetParent !== null;
+            log('restartLog', `按钮可见性: ${isVisible ? '可见' : '不可见'}`);
+            
+            // 检查按钮是否可点击
+            const isClickable = !restartButton.disabled && 
+                               restartButton.style.pointerEvents !== 'none';
+            log('restartLog', `按钮可点击性: ${isClickable ? '可点击' : '不可点击'}`);
+            
+            // 模拟点击
+            log('restartLog', '模拟点击重新开始按钮...');
+            restartButton.click();
+            log('restartLog', '点击完成');
+        }
+
+        function checkEventListeners() {
+            log('restartLog', '=== 检查事件监听器 ===');
+            
+            const restartButton = document.getElementById('restartButton');
+            if (!restartButton) {
+                log('restartLog', '❌ 错误: 找不到重新开始按钮');
+                return;
+            }
+            
+            // 检查是否有事件监听器
+            const hasListeners = restartButton.onclick !== null || 
+                                restartButton.addEventListener !== undefined;
+            log('restartLog', `事件监听器状态: ${hasListeners ? '存在' : '不存在'}`);
+            
+            // 检查按钮的HTML属性
+            log('restartLog', `按钮ID: ${restartButton.id}`);
+            log('restartLog', `按钮文本: ${restartButton.textContent}`);
+            log('restartLog', `按钮类型: ${restartButton.type}`);
+        }
+
+        function testBulletRange() {
+            log('bulletLog', '=== 测试子弹射程 ===');
+            
+            // 模拟不同玩家位置的子弹射程
+            const playerPositions = [1280, 1000, 500, 0];
+            
+            playerPositions.forEach(playerY => {
+                const bulletInitialY = playerY - CONFIG.PLAYER.BULLET_HEIGHT;
+                const boundaryY = -5000;
+                const bulletSpeed = CONFIG.PLAYER.BULLET_SPEED;
+                
+                // 计算子弹飞行距离
+                const flightDistance = bulletInitialY - boundaryY;
+                const flightTime = flightDistance / bulletSpeed;
+                
+                log('bulletLog', `玩家Y: ${playerY}, 子弹初始Y: ${bulletInitialY}, 射程: ${flightTime.toFixed(2)}秒`);
+            });
+            
+            log('bulletLog', '=== 子弹射程分析 ===');
+            log('bulletLog', '子弹速度: 2400像素/秒');
+            log('bulletLog', '边界检查: y + height < -5000');
+            log('bulletLog', '玩家移动速度: 390像素/秒');
+        }
+
+        function simulateBulletLifecycle() {
+            log('bulletLog', '=== 模拟子弹生命周期 ===');
+            
+            // 模拟子弹创建
+            const playerY = 1280;
+            const bulletY = playerY - CONFIG.PLAYER.BULLET_HEIGHT;
+            const bulletSpeed = -CONFIG.PLAYER.BULLET_SPEED;
+            
+            log('bulletLog', `子弹创建: Y=${bulletY}, 速度=${bulletSpeed}`);
+            
+            // 模拟子弹更新
+            let currentY = bulletY;
+            let time = 0;
+            let step = 0;
+            
+            while (currentY > -5000 && step < 100) {
+                time += 0.016; // 约60FPS
+                currentY += bulletSpeed * 0.016;
+                step++;
+                
+                if (step % 10 === 0) {
+                    log('bulletLog', `时间: ${time.toFixed(2)}s, Y: ${currentY.toFixed(1)}`);
+                }
+            }
+            
+            log('bulletLog', `子弹销毁: 时间=${time.toFixed(2)}s, Y=${currentY.toFixed(1)}`);
+        }
+
+        function runFullTest() {
+            log('fullLog', '=== 开始完整测试 ===');
+            
+            // 测试1: 检查游戏引擎是否存在
+            if (typeof gameEngine !== 'undefined') {
+                log('fullLog', '✅ 游戏引擎存在');
+                log('fullLog', `游戏状态: ${gameEngine.gameState}`);
+                log('fullLog', `是否运行: ${gameEngine.isRunning}`);
+            } else {
+                log('fullLog', '❌ 游戏引擎不存在');
+            }
+            
+            // 测试2: 检查UI管理器
+            if (typeof gameEngine !== 'undefined' && gameEngine.uiManager) {
+                log('fullLog', '✅ UI管理器存在');
+                log('fullLog', `重新开始回调: ${typeof gameEngine.uiManager.onGameRestart}`);
+            } else {
+                log('fullLog', '❌ UI管理器不存在');
+            }
+            
+            // 测试3: 检查子弹数组
+            if (typeof gameEngine !== 'undefined' && gameEngine.bullets) {
+                log('fullLog', `✅ 子弹数组存在, 长度: ${gameEngine.bullets.length}`);
+            } else {
+                log('fullLog', '❌ 子弹数组不存在');
+            }
+            
+            // 测试4: 检查玩家对象
+            if (typeof gameEngine !== 'undefined' && gameEngine.player) {
+                log('fullLog', '✅ 玩家对象存在');
+                log('fullLog', `玩家位置: (${gameEngine.player.x}, ${gameEngine.player.y})`);
+                log('fullLog', `玩家活跃: ${gameEngine.player.active}`);
+            } else {
+                log('fullLog', '❌ 玩家对象不存在');
+            }
+            
+            log('fullLog', '=== 完整测试完成 ===');
+        }
+
+        function clearLogs() {
+            document.getElementById('restartLog').textContent = '';
+            document.getElementById('bulletLog').textContent = '';
+            document.getElementById('fullLog').textContent = '';
+        }
+
+        // 页面加载时的初始化
+        window.onload = function() {
+            log('fullLog', '调试工具已加载');
+            log('fullLog', '请先打开游戏页面，然后运行测试');
+        };
+    </script>
+</body>
+</html>
+
+
+

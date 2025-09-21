@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪物激活测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #5a4a2d;
+            border-left: 4px solid #ff9800;
+        }
+        .error {
+            background-color: #5a2d2d;
+            border-left: 4px solid #f44336;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .coordinate-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .coordinate-table th, .coordinate-table td {
+            border: 1px solid #4ecdc4;
+            padding: 8px;
+            text-align: center;
+        }
+        .coordinate-table th {
+            background-color: rgba(78, 205, 196, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>👹 怪物激活测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 问题分析</h2>
+        <div class="test-result info">
+            <strong>🔍 问题发现</strong><br>
+            测试工具显示生成了27个怪物，但游戏中没有显示，说明问题在于怪物激活逻辑。
+        </div>
+        <div class="test-result warning">
+            <strong>⚠️ 原因分析</strong><br>
+            怪物激活条件：<code>enemy.y > player.y - 1.5 * CANVAS_HEIGHT</code><br>
+            这个条件在玩家向上移动时可能永远不会满足。
+        </div>
+        <div class="test-result pass">
+            <strong>✅ 修复方案</strong><br>
+            改为：<code>player.y - enemy.y < 1.5 * CANVAS_HEIGHT</code><br>
+            当玩家接近怪物时激活，而不是基于绝对坐标。
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 测试功能</h2>
+        <button onclick="testMonsterActivationLogic()">测试怪物激活逻辑</button>
+        <button onclick="testCoordinateSystem()">测试坐标系统</button>
+        <button onclick="testPlayerMovement()">测试玩家移动</button>
+        <button onclick="simulateGameplay()">模拟游戏过程</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function addResult(type, title, message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `
+                <div class="test-result ${type}">
+                    <strong>[${timestamp}] ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function testMonsterActivationLogic() {
+            log('👹 开始测试怪物激活逻辑...');
+            
+            // 游戏配置
+            const CANVAS_HEIGHT = 2560;
+            const PLAYER_START_Y = 1280;
+            const PLAYER_MOVE_SPEED = 780; // 像素/秒
+            const SAFE_DISTANCE = 5 * PLAYER_MOVE_SPEED * 0.5; // 1950像素
+            const SPAWN_DISTANCE = 300; // 每300像素一个生成点
+            
+            log(`游戏配置:`);
+            log(`- 屏幕高度: ${CANVAS_HEIGHT}px`);
+            log(`- 玩家初始Y: ${PLAYER_START_Y}px`);
+            log(`- 玩家移动速度: ${PLAYER_MOVE_SPEED}px/s`);
+            log(`- 安全距离: ${SAFE_DISTANCE}px`);
+            log(`- 生成距离: ${SPAWN_DISTANCE}px`);
+            
+            // 模拟怪物生成位置
+            const monsters = [];
+            for (let i = 0; i < 10; i++) {
+                const y = PLAYER_START_Y - SAFE_DISTANCE - (i + 1) * SPAWN_DISTANCE;
+                monsters.push({
+                    id: i + 1,
+                    y: y,
+                    active: false
+                });
+            }
+            
+            log(`\n怪物生成位置:`);
+            monsters.forEach(monster => {
+                log(`怪物${monster.id}: Y=${monster.y}px`);
+            });
+            
+            // 测试旧的激活逻辑
+            log(`\n旧激活逻辑测试:`);
+            const oldActivationThreshold = PLAYER_START_Y - CANVAS_HEIGHT * 1.5;
+            log(`激活阈值: ${oldActivationThreshold}px`);
+            
+            monsters.forEach(monster => {
+                const wouldActivate = monster.y > oldActivationThreshold;
+                log(`怪物${monster.id}: Y=${monster.y} > ${oldActivationThreshold} = ${wouldActivate}`);
+            });
+            
+            // 测试新的激活逻辑
+            log(`\n新激活逻辑测试:`);
+            const activationDistance = CANVAS_HEIGHT * 1.5;
+            log(`激活距离: ${activationDistance}px`);
+            
+            // 模拟玩家移动
+            for (let time = 0; time <= 10; time++) {
+                const playerY = PLAYER_START_Y - PLAYER_MOVE_SPEED * time;
+                log(`\n时间${time}秒: 玩家Y=${playerY.toFixed(1)}px`);
+                
+                monsters.forEach(monster => {
+                    if (!monster.active) {
+                        const distanceToPlayer = playerY - monster.y;
+                        const shouldActivate = distanceToPlayer < activationDistance;
+                        if (shouldActivate) {
+                            monster.active = true;
+                            log(`  怪物${monster.id}激活: 距离=${distanceToPlayer.toFixed(1)}px`);
+                        }
+                    }
+                });
+            }
+            
+            const activatedMonsters = monsters.filter(m => m.active).length;
+            log(`\n激活结果: ${activatedMonsters}/${monsters.length} 个怪物被激活`);
+            
+            if (activatedMonsters > 0) {
+                addResult('pass', '怪物激活逻辑测试', `新逻辑成功激活${activatedMonsters}个怪物`);
+            } else {
+                addResult('error', '怪物激活逻辑测试', '新逻辑没有激活任何怪物');
+            }
+        }
+
+        function testCoordinateSystem() {
+            log('📐 开始测试坐标系统...');
+            
+            const CANVAS_HEIGHT = 2560;
+            const PLAYER_START_Y = 1280;
+            
+            log(`坐标系统分析:`);
+            log(`- 屏幕高度: ${CANVAS_HEIGHT}px`);
+            log(`- 玩家初始Y: ${PLAYER_START_Y}px (屏幕中央)`);
+            log(`- 屏幕顶部: 0px`);
+            log(`- 屏幕底部: ${CANVAS_HEIGHT}px`);
+            
+            // 分析怪物生成位置
+            const SAFE_DISTANCE = 1950;
+            const SPAWN_DISTANCE = 300;
+            
+            log(`\n怪物生成位置分析:`);
+            for (let i = 0; i < 5; i++) {
+                const monsterY = PLAYER_START_Y - SAFE_DISTANCE - (i + 1) * SPAWN_DISTANCE;
+                const relativeToScreen = monsterY < 0 ? '屏幕上方' : '屏幕内';
+                log(`怪物${i + 1}: Y=${monsterY}px (${relativeToScreen})`);
+            }
+            
+            // 分析激活条件
+            log(`\n激活条件分析:`);
+            const oldThreshold = PLAYER_START_Y - CANVAS_HEIGHT * 1.5;
+            const newDistance = CANVAS_HEIGHT * 1.5;
+            
+            log(`旧逻辑阈值: ${oldThreshold}px`);
+            log(`新逻辑距离: ${newDistance}px`);
+            
+            if (oldThreshold < 0) {
+                log(`旧逻辑问题: 阈值为负值，怪物可能永远无法激活`);
+            }
+            
+            addResult('info', '坐标系统测试', '坐标系统分析完成');
+        }
+
+        function testPlayerMovement() {
+            log('🏃 开始测试玩家移动...');
+            
+            const PLAYER_START_Y = 1280;
+            const PLAYER_MOVE_SPEED = 780; // 像素/秒
+            
+            log(`玩家移动模拟:`);
+            log(`初始位置: Y=${PLAYER_START_Y}px`);
+            log(`移动速度: ${PLAYER_MOVE_SPEED}px/s (向上)`);
+            
+            // 模拟10秒的移动
+            for (let time = 0; time <= 10; time++) {
+                const playerY = PLAYER_START_Y - PLAYER_MOVE_SPEED * time;
+                log(`时间${time}秒: Y=${playerY.toFixed(1)}px`);
+            }
+            
+            // 计算移动距离
+            const totalDistance = PLAYER_MOVE_SPEED * 10;
+            log(`\n10秒总移动距离: ${totalDistance}px`);
+            
+            addResult('info', '玩家移动测试', `玩家10秒移动${totalDistance}px`);
+        }
+
+        function simulateGameplay() {
+            log('🎮 开始模拟游戏过程...');
+            
+            const CANVAS_HEIGHT = 2560;
+            const PLAYER_START_Y = 1280;
+            const PLAYER_MOVE_SPEED = 780;
+            const SAFE_DISTANCE = 1950;
+            const SPAWN_DISTANCE = 300;
+            const ACTIVATION_DISTANCE = CANVAS_HEIGHT * 1.5;
+            
+            // 生成怪物
+            const monsters = [];
+            for (let i = 0; i < 10; i++) {
+                const y = PLAYER_START_Y - SAFE_DISTANCE - (i + 1) * SPAWN_DISTANCE;
+                monsters.push({
+                    id: i + 1,
+                    y: y,
+                    active: false,
+                    activatedAt: null
+                });
+            }
+            
+            log(`游戏模拟开始:`);
+            log(`预生成怪物数量: ${monsters.length}个`);
+            
+            // 模拟游戏过程
+            let activatedCount = 0;
+            for (let time = 0; time <= 20; time++) {
+                const playerY = PLAYER_START_Y - PLAYER_MOVE_SPEED * time;
+                
+                // 检查怪物激活
+                monsters.forEach(monster => {
+                    if (!monster.active) {
+                        const distanceToPlayer = playerY - monster.y;
+                        if (distanceToPlayer < ACTIVATION_DISTANCE) {
+                            monster.active = true;
+                            monster.activatedAt = time;
+                            activatedCount++;
+                            log(`时间${time}秒: 怪物${monster.id}激活 (距离${distanceToPlayer.toFixed(1)}px)`);
+                        }
+                    }
+                });
+            }
+            
+            log(`\n游戏模拟结果:`);
+            log(`激活怪物数量: ${activatedCount}/${monsters.length}个`);
+            
+            if (activatedCount > 0) {
+                addResult('pass', '游戏模拟测试', `成功激活${activatedCount}个怪物`);
+            } else {
+                addResult('error', '游戏模拟测试', '没有激活任何怪物');
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('👹 怪物激活测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

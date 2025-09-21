@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪物问题调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .debug-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        .coordinate-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .coord-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #4ecdc4;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .coord-card h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 怪物问题调试工具</h1>
+    
+    <div class="debug-section">
+        <h2>📋 调试步骤</h2>
+        <ol>
+            <li>打开游戏页面 (index.html)</li>
+            <li>按F12打开开发者工具</li>
+            <li>切换到Console标签</li>
+            <li>开始游戏</li>
+            <li>观察控制台输出</li>
+        </ol>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔍 关键调试信息</h2>
+        <div class="coordinate-info">
+            <div class="coord-card">
+                <h3>🎮 游戏配置</h3>
+                <div>屏幕宽度: 1440px</div>
+                <div>屏幕高度: 2560px</div>
+                <div>玩家初始Y: 1280px</div>
+                <div>玩家移动速度: 780px/s</div>
+            </div>
+            <div class="coord-card">
+                <h3>👹 怪物生成</h3>
+                <div>安全距离: 1950px</div>
+                <div>生成间距: 300px</div>
+                <div>激活距离: 3840px</div>
+                <div>预期怪物数: 26个</div>
+            </div>
+            <div class="coord-card">
+                <h3>📷 摄像机</h3>
+                <div>水平位置: 固定720px</div>
+                <div>垂直位置: 跟随玩家</div>
+                <div>视野检查: 启用</div>
+                <div>调试模式: 启用</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🔍 查找的调试信息</h2>
+        <div class="debug-info" id="debugInfo">
+            等待调试信息...
+        </div>
+        <button onclick="checkDebugInfo()">检查调试信息</button>
+        <button onclick="clearDebugInfo()">清空信息</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>📊 可能的问题和解决方案</h2>
+        <div class="debug-info">
+            <strong>问题1: 怪物没有生成</strong>
+            <br>查找: "怪物生成完成" 日志
+            <br>解决: 检查preSpawnEnemies()方法
+            <br><br>
+            
+            <strong>问题2: 怪物没有激活</strong>
+            <br>查找: "激活怪物" 日志
+            <br>解决: 检查spawnEnemies()方法
+            <br><br>
+            
+            <strong>问题3: 怪物不在视野内</strong>
+            <br>查找: "怪物不在视野内" 日志
+            <br>解决: 检查camera.isInView()方法
+            <br><br>
+            
+            <strong>问题4: 怪物被红色边框包围</strong>
+            <br>说明: 怪物已激活但正常渲染失败
+            <br>解决: 检查enemy.draw()方法
+        </div>
+    </div>
+
+    <div class="debug-section">
+        <h2>🎯 快速测试</h2>
+        <button onclick="testCoordinateConversion()">测试坐标转换</button>
+        <button onclick="testCameraView()">测试摄像机视野</button>
+        <button onclick="testMonsterPositions()">测试怪物位置</button>
+    </div>
+
+    <script>
+        function checkDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <strong>调试信息检查清单:</strong><br><br>
+                
+                <strong>1. 怪物生成阶段:</strong><br>
+                - 查找 "怪物生成完成" 消息<br>
+                - 应该显示: "总生成怪物数量: XX"<br><br>
+                
+                <strong>2. 怪物激活阶段:</strong><br>
+                - 查找 "激活怪物" 消息<br>
+                - 应该显示怪物类型、位置、距离<br><br>
+                
+                <strong>3. 怪物渲染阶段:</strong><br>
+                - 查找 "怪物不在视野内" 消息<br>
+                - 应该显示世界坐标和屏幕坐标<br><br>
+                
+                <strong>4. 摄像机信息:</strong><br>
+                - 查找 "Camera:" 消息<br>
+                - 应该显示摄像机位置<br><br>
+                
+                <strong>5. 玩家信息:</strong><br>
+                - 查找 "Player:" 消息<br>
+                - 应该显示玩家位置<br><br>
+                
+                <strong>如果没有看到这些信息，请:</strong><br>
+                1. 确保游戏已经开始<br>
+                2. 等待几秒钟让玩家移动<br>
+                3. 检查是否有JavaScript错误
+            `;
+        }
+
+        function clearDebugInfo() {
+            document.getElementById('debugInfo').innerHTML = '等待调试信息...';
+        }
+
+        function testCoordinateConversion() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <strong>坐标转换测试:</strong><br><br>
+                
+                假设摄像机位置: (720, 1000)<br>
+                假设怪物位置: (720, 500)<br><br>
+                
+                世界坐标转屏幕坐标:<br>
+                screenX = 720 - 720 + 720 = 720<br>
+                screenY = 500 - 1000 + 1280 = 780<br><br>
+                
+                视野检查:<br>
+                x + width >= 0: 720 + 300 >= 0 ✓<br>
+                x <= 1440: 720 <= 1440 ✓<br>
+                y + height >= 0: 780 + 450 >= 0 ✓<br>
+                y <= 2560: 780 <= 2560 ✓<br><br>
+                
+                结果: 怪物应该在视野内
+            `;
+        }
+
+        function testCameraView() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <strong>摄像机视野测试:</strong><br><br>
+                
+                摄像机位置: (720, playerY)<br>
+                屏幕中心: (720, 1280)<br><br>
+                
+                视野范围:<br>
+                水平: 0 到 1440<br>
+                垂直: playerY-1280 到 playerY+1280<br><br>
+                
+                怪物位置: (720, playerY-1000)<br>
+                屏幕坐标: (720, 280)<br><br>
+                
+                检查: 280 在 0 到 2560 范围内 ✓<br>
+                结果: 怪物应该在视野内
+            `;
+        }
+
+        function testMonsterPositions() {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML = `
+                <strong>怪物位置测试:</strong><br><br>
+                
+                玩家初始位置: (720, 1280)<br>
+                安全距离: 1950px<br>
+                生成间距: 300px<br><br>
+                
+                怪物生成位置:<br>
+                怪物1: (720, 1280-1950-300) = (720, -970)<br>
+                怪物2: (720, 1280-1950-600) = (720, -1270)<br>
+                怪物3: (720, 1280-1950-900) = (720, -1570)<br><br>
+                
+                激活条件:<br>
+                玩家Y - 怪物Y < 3840<br>
+                1280 - (-970) = 2250 < 3840 ✓<br>
+                1280 - (-1270) = 2550 < 3840 ✓<br>
+                1280 - (-1570) = 2850 < 3840 ✓<br><br>
+                
+                结果: 怪物应该被激活
+            `;
+        }
+
+        // 页面加载时的提示
+        window.onload = function() {
+            checkDebugInfo();
+        };
+    </script>
+</body>
+</html>
+
+
+

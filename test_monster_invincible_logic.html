@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>怪物无敌逻辑测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-info {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .test-info ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .test-info li {
+            margin: 5px 0;
+        }
+        
+        .controls {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .controls h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .control-group {
+            margin: 10px 0;
+        }
+        
+        .control-group label {
+            display: inline-block;
+            width: 200px;
+            color: #4ecdc4;
+        }
+        
+        .control-group input, .control-group button {
+            padding: 5px 10px;
+            margin: 5px;
+            border: 1px solid #4ecdc4;
+            background-color: #0f0f23;
+            color: white;
+            border-radius: 5px;
+        }
+        
+        .control-group button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            cursor: pointer;
+        }
+        
+        .control-group button:hover {
+            background-color: #3bb5b0;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            display: block;
+            margin: 20px auto;
+            background-color: #0f0f23;
+        }
+        
+        .debug-info {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .debug-info h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .debug-info pre {
+            background-color: #0f0f23;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>怪物无敌逻辑测试</h1>
+        
+        <div class="test-info">
+            <h2>测试说明</h2>
+            <p>此测试用于验证怪物无敌逻辑是否正常工作：</p>
+            <ul>
+                <li><strong>默认状态：</strong>怪物默认处于无敌状态（半透明显示）</li>
+                <li><strong>距离检测：</strong>当玩家与怪物距离 ≤ 600像素时，怪物解除无敌状态</li>
+                <li><strong>伤害免疫：</strong>无敌状态的怪物不会受到子弹伤害</li>
+                <li><strong>视觉反馈：</strong>无敌状态时怪物显示为半透明</li>
+            </ul>
+        </div>
+        
+        <div class="controls">
+            <h3>测试控制</h3>
+            <div class="control-group">
+                <label>无敌距离：</label>
+                <input type="number" id="invincibleDistance" value="600" min="100" max="1000" step="50">
+                <button onclick="updateInvincibleDistance()">更新距离</button>
+            </div>
+            <div class="control-group">
+                <label>玩家位置：</label>
+                <input type="number" id="playerX" value="720" min="0" max="1440">
+                <input type="number" id="playerY" value="1280" min="0" max="2560">
+                <button onclick="updatePlayerPosition()">更新位置</button>
+            </div>
+            <div class="control-group">
+                <label>怪物位置：</label>
+                <input type="number" id="monsterX" value="720" min="0" max="1440">
+                <input type="number" id="monsterY" value="800" min="0" max="2560">
+                <button onclick="updateMonsterPosition()">更新位置</button>
+            </div>
+            <div class="control-group">
+                <button onclick="startTest()">开始测试</button>
+                <button onclick="stopTest()">停止测试</button>
+                <button onclick="resetTest()">重置测试</button>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="1440" height="800"></canvas>
+        
+        <div class="debug-info">
+            <h3>调试信息</h3>
+            <div id="status"></div>
+            <pre id="debugOutput"></pre>
+        </div>
+    </div>
+
+    <!-- 引入游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="gameObjects.js"></script>
+    
+    <script>
+        class MonsterInvincibleTest {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.isRunning = false;
+                this.animationId = null;
+                
+                // 测试对象
+                this.player = null;
+                this.monster = null;
+                this.bullet = null;
+                
+                // 测试状态
+                this.testResults = [];
+                this.currentTest = 0;
+                
+                this.initialize();
+            }
+            
+            async initialize() {
+                // 创建测试用的图片加载器
+                this.imageLoader = new ImageLoader();
+                try {
+                    await this.imageLoader.loadAllImages();
+                    this.log('图片资源加载完成', 'success');
+                } catch (error) {
+                    this.log('图片加载失败，使用默认绘制', 'error');
+                }
+                
+                this.resetTest();
+            }
+            
+            resetTest() {
+                // 创建测试对象
+                this.player = new Player(720, 1280, this.imageLoader);
+                this.monster = new BarrelMonster(720, 800, this.imageLoader);
+                this.bullet = null;
+                
+                // 重置测试状态
+                this.testResults = [];
+                this.currentTest = 0;
+                
+                this.log('测试已重置', 'info');
+                this.updateDebugInfo();
+            }
+            
+            startTest() {
+                if (this.isRunning) return;
+                
+                this.isRunning = true;
+                this.log('开始测试怪物无敌逻辑', 'info');
+                this.gameLoop();
+            }
+            
+            stopTest() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                this.log('测试已停止', 'info');
+            }
+            
+            updateInvincibleDistance() {
+                const distance = parseInt(document.getElementById('invincibleDistance').value);
+                CONFIG.BALANCE.MONSTER_INVINCIBLE_DISTANCE = distance;
+                this.monster.invincibleDistance = distance;
+                this.log(`无敌距离已更新为: ${distance}像素`, 'info');
+            }
+            
+            updatePlayerPosition() {
+                const x = parseInt(document.getElementById('playerX').value);
+                const y = parseInt(document.getElementById('playerY').value);
+                this.player.x = x;
+                this.player.y = y;
+                this.log(`玩家位置已更新为: (${x}, ${y})`, 'info');
+            }
+            
+            updateMonsterPosition() {
+                const x = parseInt(document.getElementById('monsterX').value);
+                const y = parseInt(document.getElementById('monsterY').value);
+                this.monster.x = x;
+                this.monster.y = y;
+                this.log(`怪物位置已更新为: (${x}, ${y})`, 'info');
+            }
+            
+            gameLoop() {
+                if (!this.isRunning) return;
+                
+                this.update();
+                this.render();
+                
+                this.animationId = requestAnimationFrame(() => this.gameLoop());
+            }
+            
+            update() {
+                // 更新怪物无敌状态
+                this.monster.update(1/60, this.player);
+                
+                // 检查距离和无敌状态
+                const dx = this.monster.x - this.player.x;
+                const dy = this.monster.y - this.player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // 记录测试结果
+                const result = {
+                    distance: distance,
+                    invincible: this.monster.invincible,
+                    expectedInvincible: distance > this.monster.invincibleDistance,
+                    correct: this.monster.invincible === (distance > this.monster.invincibleDistance)
+                };
+                
+                this.testResults.push(result);
+                
+                // 保持最近100个测试结果
+                if (this.testResults.length > 100) {
+                    this.testResults.shift();
+                }
+                
+                this.updateDebugInfo();
+            }
+            
+            render() {
+                // 清空画布
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制背景
+                this.ctx.fillStyle = '#0f0f23';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // 绘制玩家
+                this.player.draw(this.ctx);
+                
+                // 绘制怪物
+                this.monster.draw(this.ctx);
+                
+                // 绘制距离线
+                this.ctx.strokeStyle = this.monster.invincible ? '#ff6b6b' : '#4ecdc4';
+                this.ctx.lineWidth = 2;
+                this.ctx.setLineDash([5, 5]);
+                this.ctx.beginPath();
+                this.ctx.moveTo(this.player.x + this.player.width/2, this.player.y + this.player.height/2);
+                this.ctx.lineTo(this.monster.x + this.monster.width/2, this.monster.y + this.monster.height/2);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // 绘制距离文本
+                const dx = this.monster.x - this.player.x;
+                const dy = this.monster.y - this.player.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.font = '16px Arial';
+                this.ctx.fillText(`距离: ${distance.toFixed(1)}px`, 10, 30);
+                this.ctx.fillText(`无敌距离: ${this.monster.invincibleDistance}px`, 10, 50);
+                this.ctx.fillText(`无敌状态: ${this.monster.invincible ? '是' : '否'}`, 10, 70);
+                
+                // 绘制无敌范围圆圈
+                this.ctx.strokeStyle = '#ffd700';
+                this.ctx.lineWidth = 1;
+                this.ctx.setLineDash([3, 3]);
+                this.ctx.beginPath();
+                this.ctx.arc(this.player.x + this.player.width/2, this.player.y + this.player.height/2, this.monster.invincibleDistance, 0, Math.PI * 2);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+            }
+            
+            updateDebugInfo() {
+                const statusDiv = document.getElementById('status');
+                const debugDiv = document.getElementById('debugOutput');
+                
+                if (this.testResults.length === 0) {
+                    statusDiv.innerHTML = '<div class="status info">等待测试数据...</div>';
+                    debugDiv.textContent = '暂无测试数据';
+                    return;
+                }
+                
+                // 计算测试统计
+                const totalTests = this.testResults.length;
+                const correctTests = this.testResults.filter(r => r.correct).length;
+                const accuracy = totalTests > 0 ? (correctTests / totalTests * 100).toFixed(1) : 0;
+                
+                // 显示状态
+                let statusClass = 'info';
+                let statusText = '测试进行中';
+                
+                if (accuracy >= 95) {
+                    statusClass = 'success';
+                    statusText = '测试通过';
+                } else if (accuracy < 90) {
+                    statusClass = 'error';
+                    statusText = '测试失败';
+                }
+                
+                statusDiv.innerHTML = `
+                    <div class="status ${statusClass}">
+                        ${statusText} - 准确率: ${accuracy}% (${correctTests}/${totalTests})
+                    </div>
+                `;
+                
+                // 显示最近的测试结果
+                const recentResults = this.testResults.slice(-10);
+                const debugText = recentResults.map((result, index) => {
+                    const status = result.correct ? '✓' : '✗';
+                    return `${status} 距离: ${result.distance.toFixed(1)}px, 无敌: ${result.invincible}, 预期: ${result.expectedInvincible}`;
+                }).join('\n');
+                
+                debugDiv.textContent = debugText;
+            }
+            
+            log(message, type = 'info') {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            }
+        }
+        
+        // 全局函数
+        let testInstance = null;
+        
+        function startTest() {
+            if (testInstance) {
+                testInstance.startTest();
+            }
+        }
+        
+        function stopTest() {
+            if (testInstance) {
+                testInstance.stopTest();
+            }
+        }
+        
+        function resetTest() {
+            if (testInstance) {
+                testInstance.resetTest();
+            }
+        }
+        
+        function updateInvincibleDistance() {
+            if (testInstance) {
+                testInstance.updateInvincibleDistance();
+            }
+        }
+        
+        function updatePlayerPosition() {
+            if (testInstance) {
+                testInstance.updatePlayerPosition();
+            }
+        }
+        
+        function updateMonsterPosition() {
+            if (testInstance) {
+                testInstance.updateMonsterPosition();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            testInstance = new MonsterInvincibleTest();
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子弹时间测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #5a4a2d;
+            border-left: 4px solid #ff9800;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .calculation-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .calculation-table th, .calculation-table td {
+            border: 1px solid #4ecdc4;
+            padding: 8px;
+            text-align: center;
+        }
+        .calculation-table th {
+            background-color: rgba(78, 205, 196, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>🔫 子弹时间测试</h1>
+    
+    <div class="test-section">
+        <h2>📊 问题分析</h2>
+        <div class="test-result info">
+            <strong>问题描述:</strong> 游戏时间32秒左右，子弹变短消失<br>
+            <strong>根本原因:</strong> 玩家向上移动，Y坐标变小，子弹边界检查失效<br>
+            <strong>修复方案:</strong> 扩大子弹边界检查范围
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧮 计算分析</h2>
+        <table class="calculation-table">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>玩家Y位置</th>
+                    <th>子弹Y位置</th>
+                    <th>边界检查</th>
+                    <th>结果</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>0秒</td>
+                    <td>1280</td>
+                    <td>1280</td>
+                    <td>1280 > -5000</td>
+                    <td>✅ 存活</td>
+                </tr>
+                <tr>
+                    <td>10秒</td>
+                    <td>-670</td>
+                    <td>-670</td>
+                    <td>-670 > -5000</td>
+                    <td>✅ 存活</td>
+                </tr>
+                <tr>
+                    <td>20秒</td>
+                    <td>-2620</td>
+                    <td>-2620</td>
+                    <td>-2620 > -5000</td>
+                    <td>✅ 存活</td>
+                </tr>
+                <tr>
+                    <td>32秒</td>
+                    <td>-4960</td>
+                    <td>-4960</td>
+                    <td>-4960 > -5000</td>
+                    <td>⚠️ 接近边界</td>
+                </tr>
+                <tr>
+                    <td>35秒</td>
+                    <td>-5425</td>
+                    <td>-5425</td>
+                    <td>-5425 < -5000</td>
+                    <td>❌ 销毁</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>🔧 修复方案</h2>
+        <div class="test-result pass">
+            <strong>修复前:</strong> 子弹边界 -5000像素<br>
+            <strong>修复后:</strong> 子弹边界 -10000像素<br>
+            <strong>效果:</strong> 子弹射程增加一倍，可以支持更长时间的游戏
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 测试功能</h2>
+        <button onclick="testBulletTiming()">测试子弹时间</button>
+        <button onclick="testBoundaryCalculation()">测试边界计算</button>
+        <button onclick="simulateGameTime()">模拟游戏时间</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        // 游戏参数
+        const PLAYER_START_Y = 1280;
+        const PLAYER_MOVE_SPEED = 195; // 390 * 0.5
+        const BULLET_SPEED = 800;
+        const OLD_BOUNDARY = -5000;
+        const NEW_BOUNDARY = -10000;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function addResult(type, title, message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `
+                <div class="test-result ${type}">
+                    <strong>[${timestamp}] ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function testBulletTiming() {
+            log('🔫 开始测试子弹时间...');
+            
+            const testTimes = [0, 10, 20, 30, 32, 35, 40, 50];
+            
+            testTimes.forEach(time => {
+                const playerY = PLAYER_START_Y - (PLAYER_MOVE_SPEED * time);
+                const bulletY = playerY; // 子弹从玩家位置发射
+                
+                // 测试旧边界
+                const oldResult = bulletY > OLD_BOUNDARY ? '存活' : '销毁';
+                // 测试新边界
+                const newResult = bulletY > NEW_BOUNDARY ? '存活' : '销毁';
+                
+                log(`${time}秒: 玩家Y=${playerY.toFixed(0)}, 子弹Y=${bulletY.toFixed(0)}`);
+                log(`  旧边界(${OLD_BOUNDARY}): ${oldResult} | 新边界(${NEW_BOUNDARY}): ${newResult}`);
+            });
+            
+            log('✅ 子弹时间测试完成');
+            addResult('info', '子弹时间测试', '详细时间分析完成，请查看日志');
+        }
+
+        function testBoundaryCalculation() {
+            log('🧮 开始测试边界计算...');
+            
+            // 计算子弹能存活多长时间
+            const oldMaxTime = Math.abs(OLD_BOUNDARY - PLAYER_START_Y) / PLAYER_MOVE_SPEED;
+            const newMaxTime = Math.abs(NEW_BOUNDARY - PLAYER_START_Y) / PLAYER_MOVE_SPEED;
+            
+            log(`旧边界最大存活时间: ${oldMaxTime.toFixed(1)}秒`);
+            log(`新边界最大存活时间: ${newMaxTime.toFixed(1)}秒`);
+            log(`时间增加: ${(newMaxTime - oldMaxTime).toFixed(1)}秒`);
+            
+            // 计算子弹射程
+            const oldRange = oldMaxTime * BULLET_SPEED;
+            const newRange = newMaxTime * BULLET_SPEED;
+            
+            log(`旧边界子弹射程: ${oldRange.toFixed(0)}像素`);
+            log(`新边界子弹射程: ${newRange.toFixed(0)}像素`);
+            log(`射程增加: ${(newRange - oldRange).toFixed(0)}像素`);
+            
+            const improvement = ((newMaxTime - oldMaxTime) / oldMaxTime * 100).toFixed(1);
+            log(`性能提升: ${improvement}%`);
+            
+            addResult('pass', '边界计算', 
+                `最大存活时间: ${oldMaxTime.toFixed(1)}秒 → ${newMaxTime.toFixed(1)}秒 (提升${improvement}%)`);
+        }
+
+        function simulateGameTime() {
+            log('🎮 开始模拟游戏时间...');
+            
+            let time = 0;
+            let playerY = PLAYER_START_Y;
+            let bulletCount = 0;
+            let destroyedBullets = 0;
+            
+            // 模拟60秒游戏
+            while (time <= 60) {
+                playerY = PLAYER_START_Y - (PLAYER_MOVE_SPEED * time);
+                
+                // 每秒发射子弹
+                if (time % 1 === 0) {
+                    bulletCount++;
+                    const bulletY = playerY;
+                    
+                    // 检查子弹是否会被销毁
+                    if (bulletY <= NEW_BOUNDARY) {
+                        destroyedBullets++;
+                        if (time === 32) {
+                            log(`⚠️ 32秒时: 玩家Y=${playerY.toFixed(0)}, 子弹Y=${bulletY.toFixed(0)}`);
+                        }
+                    }
+                }
+                
+                time += 0.1; // 0.1秒步进
+            }
+            
+            log(`模拟完成: 总子弹${bulletCount}个, 销毁${destroyedBullets}个`);
+            log(`销毁率: ${(destroyedBullets / bulletCount * 100).toFixed(1)}%`);
+            
+            if (destroyedBullets === 0) {
+                log('✅ 所有子弹都能正常存活');
+                addResult('pass', '游戏模拟', '60秒内所有子弹都能正常存活');
+            } else {
+                log(`❌ 有${destroyedBullets}个子弹被销毁`);
+                addResult('warning', '游戏模拟', `${destroyedBullets}个子弹被销毁，需要进一步优化`);
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🚀 子弹时间测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

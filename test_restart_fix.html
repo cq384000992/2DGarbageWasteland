@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重新开始功能修复测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-info {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-info h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .controls {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .controls h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .control-group {
+            margin: 10px 0;
+        }
+        
+        .control-group button {
+            padding: 10px 20px;
+            margin: 5px;
+            border: 1px solid #4ecdc4;
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .control-group button:hover {
+            background-color: #3bb5b0;
+        }
+        
+        .control-group button:disabled {
+            background-color: #666;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        #gameCanvas {
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            display: block;
+            margin: 20px auto;
+            background-color: #0f0f23;
+        }
+        
+        .debug-info {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .debug-info h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .debug-info pre {
+            background-color: #0f0f23;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>重新开始功能修复测试</h1>
+        
+        <div class="test-info">
+            <h2>修复内容</h2>
+            <p>此测试验证以下修复是否成功：</p>
+            <ul>
+                <li><strong>单例模式修复：</strong>确保每次页面加载时单例对象正确重置</li>
+                <li><strong>事件监听器清理：</strong>确保事件监听器正确移除和重新绑定</li>
+                <li><strong>状态重置：</strong>确保游戏状态完全重置</li>
+                <li><strong>资源清理：</strong>确保所有资源正确清理</li>
+            </ul>
+        </div>
+        
+        <div class="controls">
+            <h3>测试控制</h3>
+            <div class="control-group">
+                <button onclick="startGame()">开始游戏</button>
+                <button onclick="simulateGameOver()">模拟游戏结束</button>
+                <button onclick="restartGame()">重新开始</button>
+                <button onclick="simulatePageReload()">模拟页面重新加载</button>
+            </div>
+            <div class="control-group">
+                <button onclick="checkSingletonState()">检查单例状态</button>
+                <button onclick="checkEventListeners()">检查事件监听器</button>
+                <button onclick="clearLog()">清空日志</button>
+            </div>
+        </div>
+        
+        <canvas id="gameCanvas" width="1440" height="800"></canvas>
+        
+        <div class="debug-info">
+            <h3>测试日志</h3>
+            <div id="status"></div>
+            <pre id="debugOutput"></pre>
+        </div>
+    </div>
+
+    <!-- 引入游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+    
+    <script>
+        class RestartFixTest {
+            constructor() {
+                this.logs = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('测试系统初始化完成', 'info');
+                this.checkSingletonState();
+            }
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近100条日志
+                if (this.logs.length > 100) {
+                    this.logs.shift();
+                }
+                
+                this.updateDebugOutput();
+            }
+            
+            updateDebugOutput() {
+                const debugDiv = document.getElementById('debugOutput');
+                debugDiv.textContent = this.logs.join('\n');
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateDebugOutput();
+                this.log('日志已清空', 'info');
+            }
+            
+            async startGame() {
+                try {
+                    this.log('尝试开始游戏...', 'info');
+                    
+                    if (typeof gameEngine === 'undefined' || !gameEngine) {
+                        this.log('游戏引擎不存在，重新初始化...', 'info');
+                        gameEngine = new GameEngine();
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                    
+                    const startButton = document.getElementById('startButton');
+                    if (!startButton) {
+                        this.log('开始按钮不存在', 'error');
+                        return;
+                    }
+                    
+                    startButton.click();
+                    this.log('开始按钮已点击', 'success');
+                    
+                } catch (error) {
+                    this.log(`开始游戏失败: ${error.message}`, 'error');
+                }
+            }
+            
+            simulateGameOver() {
+                try {
+                    this.log('模拟游戏结束...', 'info');
+                    
+                    if (typeof gameEngine === 'undefined' || !gameEngine) {
+                        this.log('游戏引擎不存在', 'error');
+                        return;
+                    }
+                    
+                    gameEngine.gameOver();
+                    this.log('游戏结束已触发', 'success');
+                    
+                } catch (error) {
+                    this.log(`模拟游戏结束失败: ${error.message}`, 'error');
+                }
+            }
+            
+            async restartGame() {
+                try {
+                    this.log('尝试重新开始游戏...', 'info');
+                    
+                    const restartButton = document.getElementById('restartButton');
+                    if (!restartButton) {
+                        this.log('重新开始按钮不存在', 'error');
+                        return;
+                    }
+                    
+                    restartButton.click();
+                    this.log('重新开始按钮已点击', 'success');
+                    
+                } catch (error) {
+                    this.log(`重新开始游戏失败: ${error.message}`, 'error');
+                }
+            }
+            
+            async simulatePageReload() {
+                try {
+                    this.log('模拟页面重新加载...', 'info');
+                    
+                    // 销毁当前游戏引擎
+                    if (typeof gameEngine !== 'undefined' && gameEngine) {
+                        gameEngine.destroy();
+                        gameEngine = null;
+                        this.log('游戏引擎已销毁', 'info');
+                    }
+                    
+                    // 等待一段时间
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    // 重新初始化游戏引擎
+                    gameEngine = new GameEngine();
+                    this.log('游戏引擎已重新初始化', 'success');
+                    
+                    // 检查单例状态
+                    this.checkSingletonState();
+                    
+                } catch (error) {
+                    this.log(`模拟页面重新加载失败: ${error.message}`, 'error');
+                }
+            }
+            
+            checkSingletonState() {
+                this.log('检查单例状态...', 'info');
+                
+                // 检查UI管理器单例
+                const uiSingleton = UIManagerSingleton.getInstance();
+                if (uiSingleton && uiSingleton.uiManager) {
+                    this.log('UI管理器单例正常', 'success');
+                } else {
+                    this.log('UI管理器单例异常', 'error');
+                }
+                
+                // 检查输入管理器单例
+                const inputSingleton = InputManager.getInstance();
+                if (inputSingleton && inputSingleton.inputHandler) {
+                    this.log('输入管理器单例正常', 'success');
+                } else {
+                    this.log('输入管理器单例异常', 'error');
+                }
+                
+                // 检查音频管理器单例
+                const audioSingleton = AudioManagerSingleton.getInstance();
+                if (audioSingleton && audioSingleton.audioManager) {
+                    this.log('音频管理器单例正常', 'success');
+                } else {
+                    this.log('音频管理器单例异常', 'error');
+                }
+            }
+            
+            checkEventListeners() {
+                this.log('检查事件监听器...', 'info');
+                
+                const startButton = document.getElementById('startButton');
+                if (startButton) {
+                    this.log('开始按钮存在', 'success');
+                    
+                    // 检查按钮状态
+                    const styles = getComputedStyle(startButton);
+                    this.log(`按钮指针事件: ${styles.pointerEvents}`, 'info');
+                    this.log(`按钮光标: ${styles.cursor}`, 'info');
+                    this.log(`按钮禁用状态: ${startButton.disabled}`, 'info');
+                    
+                    if (styles.pointerEvents === 'auto' && styles.cursor === 'pointer') {
+                        this.log('按钮状态正常', 'success');
+                    } else {
+                        this.log('按钮状态异常', 'error');
+                    }
+                } else {
+                    this.log('开始按钮不存在', 'error');
+                }
+            }
+        }
+        
+        // 全局函数
+        let testInstance = null;
+        
+        function startGame() {
+            if (testInstance) {
+                testInstance.startGame();
+            }
+        }
+        
+        function simulateGameOver() {
+            if (testInstance) {
+                testInstance.simulateGameOver();
+            }
+        }
+        
+        function restartGame() {
+            if (testInstance) {
+                testInstance.restartGame();
+            }
+        }
+        
+        function simulatePageReload() {
+            if (testInstance) {
+                testInstance.simulatePageReload();
+            }
+        }
+        
+        function checkSingletonState() {
+            if (testInstance) {
+                testInstance.checkSingletonState();
+            }
+        }
+        
+        function checkEventListeners() {
+            if (testInstance) {
+                testInstance.checkEventListeners();
+            }
+        }
+        
+        function clearLog() {
+            if (testInstance) {
+                testInstance.clearLog();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            testInstance = new RestartFixTest();
+        });
+    </script>
+</body>
+</html>

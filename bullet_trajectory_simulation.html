@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>子弹轨迹演算</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .simulation {
+            background-color: #1a1a1a;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .highlight {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .success {
+            color: #4ecdc4;
+        }
+        .error {
+            color: #ff6b6b;
+        }
+        .warning {
+            color: #ffd93d;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 子弹轨迹演算分析</h1>
+    
+    <div class="simulation" id="simulation"></div>
+    
+    <script>
+        // 游戏参数
+        const CONFIG = {
+            PLAYER_START_Y: 1280,
+            PLAYER_MOVE_SPEED: 390, // 780 * 0.5 (autoMove方法)
+            SHOOT_INTERVAL: 1667, // 毫秒
+            BULLET_SPEED: 2400,
+            BULLET_HEIGHT: 50,
+            BOUNDARY_Y: -4800 // 边界检查
+        };
+
+        function simulateBulletTrajectory() {
+            let log = '';
+            log += '=== 子弹轨迹演算分析 ===\n\n';
+            
+            log += '游戏参数:\n';
+            log += `- 玩家初始Y: ${CONFIG.PLAYER_START_Y}像素\n`;
+            log += `- 玩家移动速度: ${CONFIG.PLAYER_MOVE_SPEED}像素/秒 (向上)\n`;
+            log += `- 子弹发射间隔: ${CONFIG.SHOOT_INTERVAL}毫秒 = ${CONFIG.SHOOT_INTERVAL/1000}秒\n`;
+            log += `- 子弹速度: ${CONFIG.BULLET_SPEED}像素/秒 (向上)\n`;
+            log += `- 子弹高度: ${CONFIG.BULLET_HEIGHT}像素\n`;
+            log += `- 边界检查: y < ${CONFIG.BOUNDARY_Y}\n\n`;
+            
+            log += '=== 前20发子弹轨迹演算 ===\n\n';
+            
+            let playerY = CONFIG.PLAYER_START_Y;
+            let currentTime = 0;
+            
+            for (let bulletNum = 1; bulletNum <= 20; bulletNum++) {
+                // 计算玩家当前位置
+                const playerCurrentY = CONFIG.PLAYER_START_Y - (currentTime * CONFIG.PLAYER_MOVE_SPEED);
+                
+                // 计算子弹创建位置
+                const bulletInitialY = playerCurrentY - CONFIG.BULLET_HEIGHT;
+                
+                // 计算子弹飞行距离
+                const flightDistance = bulletInitialY - CONFIG.BOUNDARY_Y;
+                
+                // 计算子弹飞行时间
+                const flightTime = flightDistance / CONFIG.BULLET_SPEED;
+                
+                // 计算子弹销毁时的Y坐标
+                const bulletDestroyY = CONFIG.BOUNDARY_Y;
+                
+                // 计算子弹销毁时的玩家Y坐标
+                const playerYAtDestroy = CONFIG.PLAYER_START_Y - ((currentTime + flightTime) * CONFIG.PLAYER_MOVE_SPEED);
+                
+                log += `第${bulletNum}发子弹:\n`;
+                log += `  发射时间: ${currentTime.toFixed(2)}秒\n`;
+                log += `  玩家Y位置: ${playerCurrentY.toFixed(1)}像素\n`;
+                log += `  子弹初始Y: ${bulletInitialY.toFixed(1)}像素\n`;
+                log += `  飞行距离: ${flightDistance.toFixed(1)}像素\n`;
+                log += `  飞行时间: ${flightTime.toFixed(2)}秒\n`;
+                log += `  子弹销毁Y: ${bulletDestroyY}像素\n`;
+                log += `  销毁时玩家Y: ${playerYAtDestroy.toFixed(1)}像素\n`;
+                
+                // 检查是否在屏幕内可见
+                const isVisible = bulletInitialY > 0 && bulletInitialY < 2560;
+                if (!isVisible) {
+                    log += `  <span class="error">❌ 子弹创建时就在屏幕外!</span>\n`;
+                } else if (flightTime < 0.1) {
+                    log += `  <span class="error">❌ 子弹飞行时间过短!</span>\n`;
+                } else {
+                    log += `  <span class="success">✅ 正常</span>\n`;
+                }
+                
+                log += '\n';
+                
+                // 更新到下一发子弹的时间
+                currentTime += CONFIG.SHOOT_INTERVAL / 1000;
+            }
+            
+            log += '=== 分析结果 ===\n\n';
+            
+            // 计算第10发和第11发子弹的详细情况
+            const bullet10Time = 9 * CONFIG.SHOOT_INTERVAL / 1000;
+            const bullet11Time = 10 * CONFIG.SHOOT_INTERVAL / 1000;
+            
+            const playerY10 = CONFIG.PLAYER_START_Y - (bullet10Time * CONFIG.PLAYER_MOVE_SPEED);
+            const playerY11 = CONFIG.PLAYER_START_Y - (bullet11Time * CONFIG.PLAYER_MOVE_SPEED);
+            
+            const bullet10InitialY = playerY10 - CONFIG.BULLET_HEIGHT;
+            const bullet11InitialY = playerY11 - CONFIG.BULLET_HEIGHT;
+            
+            log += `第10发子弹 (${bullet10Time.toFixed(2)}秒):\n`;
+            log += `  玩家Y: ${playerY10.toFixed(1)}像素\n`;
+            log += `  子弹初始Y: ${bullet10InitialY.toFixed(1)}像素\n`;
+            log += `  是否在屏幕内: ${bullet10InitialY > 0 && bullet10InitialY < 2560 ? '是' : '否'}\n\n`;
+            
+            log += `第11发子弹 (${bullet11Time.toFixed(2)}秒):\n`;
+            log += `  玩家Y: ${playerY11.toFixed(1)}像素\n`;
+            log += `  子弹初始Y: ${bullet11InitialY.toFixed(1)}像素\n`;
+            log += `  是否在屏幕内: ${bullet11InitialY > 0 && bullet11InitialY < 2560 ? '是' : '否'}\n\n`;
+            
+            // 计算子弹开始不可见的时间点
+            const invisibleTime = (CONFIG.PLAYER_START_Y - CONFIG.BULLET_HEIGHT) / CONFIG.PLAYER_MOVE_SPEED;
+            const invisibleBulletNum = Math.floor(invisibleTime / (CONFIG.SHOOT_INTERVAL / 1000)) + 1;
+            
+            log += `=== 关键发现 ===\n`;
+            log += `子弹开始不可见的时间: ${invisibleTime.toFixed(2)}秒\n`;
+            log += `子弹开始不可见的发数: 第${invisibleBulletNum}发\n`;
+            log += `此时玩家Y位置: ${(CONFIG.PLAYER_START_Y - invisibleTime * CONFIG.PLAYER_MOVE_SPEED).toFixed(1)}像素\n`;
+            log += `此时子弹初始Y: ${(CONFIG.PLAYER_START_Y - invisibleTime * CONFIG.PLAYER_MOVE_SPEED - CONFIG.BULLET_HEIGHT).toFixed(1)}像素\n\n`;
+            
+            log += `=== 问题分析 ===\n`;
+            log += `1. 玩家向上移动，Y坐标不断减少\n`;
+            log += `2. 子弹在玩家上方50像素创建\n`;
+            log += `3. 当玩家Y < 50时，子弹初始Y < 0，子弹创建时就在屏幕外\n`;
+            log += `4. 这就是为什么第11发子弹完全看不见的原因!\n\n`;
+            
+            log += `=== 解决方案 ===\n`;
+            log += `需要修改子弹创建位置，让子弹始终在屏幕内创建\n`;
+            log += `或者修改边界检查逻辑，让子弹有更合理的射程\n`;
+            
+            document.getElementById('simulation').innerHTML = log;
+        }
+
+        // 页面加载时运行演算
+        window.onload = function() {
+            simulateBulletTrajectory();
+        };
+    </script>
+</body>
+</html>
+
+
+

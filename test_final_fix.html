@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>最终修复测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .game-frame {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>最终修复测试</h1>
+        
+        <div class="test-section">
+            <h2>修复内容</h2>
+            <ul>
+                <li>✅ 恢复网页适配方案</li>
+                <li>✅ 修复开始游戏按钮无法点击的问题</li>
+                <li>✅ 简化UI管理器事件监听器设置逻辑</li>
+                <li>✅ 添加详细的调试信息</li>
+                <li>✅ 确保UI回调正确设置</li>
+            </ul>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试控制</h2>
+            <button onclick="loadGame()">加载游戏</button>
+            <button onclick="testButton()">测试按钮</button>
+            <button onclick="checkConsole()">检查控制台</button>
+            <button onclick="clearLog()">清除日志</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏测试</h2>
+            <div class="game-frame" id="gameFrame">
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: #666;">
+                    点击"加载游戏"按钮开始测试
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试状态</h2>
+            <div id="testStatus" class="status info">等待开始测试</div>
+        </div>
+    </div>
+
+    <script>
+        class FinalFixTest {
+            constructor() {
+                this.logs = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('最终修复测试系统初始化完成');
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            updateStatus(message, type = 'info') {
+                const statusElement = document.getElementById('testStatus');
+                if (statusElement) {
+                    statusElement.textContent = message;
+                    statusElement.className = 'status ' + type;
+                }
+            }
+            
+            loadGame() {
+                this.log('开始加载游戏...');
+                this.updateStatus('正在加载游戏...', 'info');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    if (gameFrame) {
+                        // 创建iframe加载游戏
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'index.html';
+                        
+                        const loadStartTime = Date.now();
+                        
+                        iframe.onload = () => {
+                            const loadTime = Date.now() - loadStartTime;
+                            this.log(`游戏页面加载完成，耗时: ${loadTime}ms`);
+                            this.updateStatus(`游戏加载完成 (${loadTime}ms)`, 'success');
+                            
+                            // 延迟检查按钮状态
+                            setTimeout(() => {
+                                this.testButton();
+                            }, 2000);
+                        };
+                        
+                        iframe.onerror = () => {
+                            this.log('游戏页面加载失败');
+                            this.updateStatus('游戏加载失败', 'error');
+                        };
+                        
+                        // 清空容器并添加iframe
+                        gameFrame.innerHTML = '';
+                        gameFrame.appendChild(iframe);
+                        
+                        this.log('游戏iframe已创建');
+                    } else {
+                        throw new Error('游戏容器不存在');
+                    }
+                } catch (error) {
+                    this.log('加载游戏时出错: ' + error.message);
+                    this.updateStatus('加载游戏失败: ' + error.message, 'error');
+                }
+            }
+            
+            testButton() {
+                this.log('=== 按钮测试 ===');
+                
+                try {
+                    const gameFrame = document.getElementById('gameFrame');
+                    const iframe = gameFrame.querySelector('iframe');
+                    
+                    if (iframe && iframe.contentDocument) {
+                        const startButton = iframe.contentDocument.getElementById('startButton');
+                        if (startButton) {
+                            this.log('找到开始按钮');
+                            
+                            // 检查按钮状态
+                            const styles = getComputedStyle(startButton);
+                            this.log(`按钮状态: display=${styles.display}, pointer-events=${styles.pointerEvents}, cursor=${styles.cursor}`);
+                            
+                            // 检查事件监听器
+                            const hasHandler = iframe.contentWindow.UIManagerSingleton?.getInstance()?.uiManager?.startButtonHandler;
+                            this.log(`事件处理器: ${hasHandler ? '已设置' : '未设置'}`);
+                            
+                            // 检查回调函数
+                            const hasCallback = iframe.contentWindow.UIManagerSingleton?.getInstance()?.uiManager?.onGameStart;
+                            this.log(`游戏开始回调: ${hasCallback ? '已设置' : '未设置'}`);
+                            
+                            // 尝试点击按钮
+                            try {
+                                startButton.click();
+                                this.log('按钮点击测试: 成功');
+                                this.updateStatus('按钮测试成功', 'success');
+                            } catch (error) {
+                                this.log('按钮点击测试: 失败 - ' + error.message);
+                                this.updateStatus('按钮点击失败', 'error');
+                            }
+                        } else {
+                            this.log('未找到开始按钮');
+                            this.updateStatus('未找到开始按钮', 'error');
+                        }
+                    } else {
+                        this.log('游戏iframe未加载或无法访问');
+                        this.updateStatus('请先加载游戏', 'info');
+                    }
+                } catch (error) {
+                    this.log('按钮测试失败: ' + error.message);
+                    this.updateStatus('按钮测试失败: ' + error.message, 'error');
+                }
+            }
+            
+            checkConsole() {
+                this.log('=== 控制台检查 ===');
+                this.log('请检查浏览器控制台中的调试信息：');
+                this.log('- 图片加载信息');
+                this.log('- 音频加载信息');
+                this.log('- UI管理器初始化信息');
+                this.log('- 事件监听器设置信息');
+                this.log('- UI回调设置信息');
+                this.updateStatus('请检查浏览器控制台', 'info');
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清除');
+            }
+        }
+        
+        // 全局变量
+        let finalFixTest = null;
+        
+        // 全局函数
+        function loadGame() {
+            if (finalFixTest) {
+                finalFixTest.loadGame();
+            }
+        }
+        
+        function testButton() {
+            if (finalFixTest) {
+                finalFixTest.testButton();
+            }
+        }
+        
+        function checkConsole() {
+            if (finalFixTest) {
+                finalFixTest.checkConsole();
+            }
+        }
+        
+        function clearLog() {
+            if (finalFixTest) {
+                finalFixTest.clearLog();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            finalFixTest = new FinalFixTest();
+        });
+        
+        // 捕获全局错误
+        window.addEventListener('error', (event) => {
+            console.error('全局错误:', event.error);
+            if (finalFixTest) {
+                finalFixTest.log('全局错误: ' + event.error.message);
+            }
+        });
+    </script>
+</body>
+</html>

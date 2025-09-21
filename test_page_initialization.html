@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面初始化测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-info {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        .success {
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+        .error {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .warning {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+        .log {
+            background-color: #000;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 页面初始化测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 问题描述</h2>
+        <div class="test-info">
+            <strong class="error">❌ 问题: 自动打开的页面无法点击开始按钮</strong><br>
+            现象: 必须关闭所有相关游戏页面，重新从文件夹打开index，才能点击开始按钮<br><br>
+            
+            <strong class="warning">⚠️ 可能原因</strong><br>
+            1. DOM元素未完全加载时就开始初始化<br>
+            2. 事件监听器绑定时机不正确<br>
+            3. 重复初始化导致冲突<br>
+            4. 单例模式问题
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 初始化状态检查</h2>
+        <button onclick="checkInitialization()">检查初始化状态</button>
+        <button onclick="checkButtonState()">检查按钮状态</button>
+        <button onclick="checkEventListeners()">检查事件监听器</button>
+        <div class="log" id="initLog"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🎯 修复验证</h2>
+        <button onclick="testButtonClick()">测试按钮点击</button>
+        <button onclick="simulatePageLoad()">模拟页面加载</button>
+        <div class="log" id="testLog"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkInitialization() {
+            log('initLog', '=== 检查初始化状态 ===');
+            
+            // 检查DOM状态
+            log('initLog', `DOM状态: ${document.readyState}`);
+            log('initLog', `页面加载时间: ${performance.now().toFixed(2)}ms`);
+            
+            // 检查游戏引擎
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('initLog', '✅ 游戏引擎存在');
+                log('initLog', `游戏状态: ${gameEngine.gameState}`);
+                log('initLog', `是否运行: ${gameEngine.isRunning}`);
+            } else {
+                log('initLog', '❌ 游戏引擎不存在');
+            }
+            
+            // 检查UI管理器
+            if (typeof gameEngine !== 'undefined' && gameEngine && gameEngine.uiManager) {
+                log('initLog', '✅ UI管理器存在');
+                log('initLog', `开始回调: ${typeof gameEngine.uiManager.onGameStart}`);
+            } else {
+                log('initLog', '❌ UI管理器不存在');
+            }
+        }
+
+        function checkButtonState() {
+            log('initLog', '=== 检查按钮状态 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('initLog', '❌ 找不到开始按钮');
+                return;
+            }
+            
+            log('initLog', '✅ 开始按钮存在');
+            log('initLog', `按钮可见性: ${startButton.style.display !== 'none' ? '可见' : '不可见'}`);
+            log('initLog', `按钮可点击性: ${!startButton.disabled ? '可点击' : '不可点击'}`);
+            log('initLog', `按钮文本: ${startButton.textContent}`);
+            log('initLog', `按钮ID: ${startButton.id}`);
+        }
+
+        function checkEventListeners() {
+            log('initLog', '=== 检查事件监听器 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('initLog', '❌ 找不到开始按钮');
+                return;
+            }
+            
+            // 检查是否有事件监听器
+            const hasListeners = startButton.onclick !== null || 
+                                startButton.addEventListener !== undefined;
+            log('initLog', `事件监听器状态: ${hasListeners ? '存在' : '不存在'}`);
+            
+            // 检查按钮的HTML属性
+            log('initLog', `按钮类型: ${startButton.type}`);
+            log('initLog', `按钮类名: ${startButton.className}`);
+        }
+
+        function testButtonClick() {
+            log('testLog', '=== 测试按钮点击 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (!startButton) {
+                log('testLog', '❌ 找不到开始按钮');
+                return;
+            }
+            
+            log('testLog', '模拟点击开始按钮...');
+            startButton.click();
+            log('testLog', '点击完成');
+            
+            // 检查游戏状态是否改变
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log('testLog', `游戏状态: ${gameEngine.gameState}`);
+                log('testLog', `是否运行: ${gameEngine.isRunning}`);
+            }
+        }
+
+        function simulatePageLoad() {
+            log('testLog', '=== 模拟页面加载 ===');
+            
+            log('testLog', '模拟DOMContentLoaded事件...');
+            
+            // 检查当前状态
+            log('testLog', `当前DOM状态: ${document.readyState}`);
+            log('testLog', `当前时间: ${performance.now().toFixed(2)}ms`);
+            
+            // 模拟事件
+            const event = new Event('DOMContentLoaded');
+            document.dispatchEvent(event);
+            
+            log('testLog', 'DOMContentLoaded事件已触发');
+        }
+
+        // 页面加载时的初始化
+        window.onload = function() {
+            log('initLog', '页面加载完成');
+            log('initLog', '请运行初始化检查');
+        };
+
+        // 监听DOMContentLoaded事件
+        document.addEventListener('DOMContentLoaded', function() {
+            log('initLog', 'DOMContentLoaded事件触发');
+        });
+    </script>
+</body>
+</html>
+
+
+

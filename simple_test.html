@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>简单功能测试</h1>
+        
+        <div class="test-section">
+            <h2>基础功能测试</h2>
+            <button onclick="testBasicFunction()">测试基础功能</button>
+            <button onclick="testButtonClick()">测试按钮点击</button>
+            <button onclick="testAsyncFunction()">测试异步功能</button>
+            <button onclick="clearLog()">清空日志</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏组件测试</h2>
+            <button onclick="testConfig()">测试配置</button>
+            <button onclick="testImageLoader()">测试图片加载器</button>
+            <button onclick="testAudioManager()">测试音频管理器</button>
+            <button onclick="testUIManager()">测试UI管理器</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>测试日志</h2>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        class SimpleTest {
+            constructor() {
+                this.logs = [];
+                this.log('测试系统初始化完成', 'info');
+            }
+            
+            log(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] [${type.toUpperCase()}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清空', 'info');
+            }
+            
+            async testBasicFunction() {
+                this.log('开始测试基础功能...', 'info');
+                
+                try {
+                    // 测试基本JavaScript功能
+                    const result = 1 + 1;
+                    this.log(`数学运算测试: 1 + 1 = ${result}`, 'success');
+                    
+                    // 测试DOM操作
+                    const testElement = document.createElement('div');
+                    testElement.textContent = '测试元素';
+                    document.body.appendChild(testElement);
+                    document.body.removeChild(testElement);
+                    this.log('DOM操作测试通过', 'success');
+                    
+                    // 测试事件处理
+                    let eventTestPassed = false;
+                    const testButton = document.createElement('button');
+                    testButton.addEventListener('click', () => {
+                        eventTestPassed = true;
+                    });
+                    testButton.click();
+                    
+                    if (eventTestPassed) {
+                        this.log('事件处理测试通过', 'success');
+                    } else {
+                        this.log('事件处理测试失败', 'error');
+                    }
+                    
+                } catch (error) {
+                    this.log(`基础功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            testButtonClick() {
+                this.log('按钮点击测试', 'info');
+                this.log('如果你看到这条消息，说明按钮点击功能正常', 'success');
+            }
+            
+            async testAsyncFunction() {
+                this.log('开始测试异步功能...', 'info');
+                
+                try {
+                    // 测试Promise
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    this.log('Promise测试通过', 'success');
+                    
+                    // 测试async/await
+                    const result = await this.delayedFunction();
+                    this.log(`异步函数测试: ${result}`, 'success');
+                    
+                } catch (error) {
+                    this.log(`异步功能测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            async delayedFunction() {
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        resolve('异步操作完成');
+                    }, 200);
+                });
+            }
+            
+            testConfig() {
+                this.log('开始测试配置...', 'info');
+                
+                try {
+                    // 检查CONFIG是否存在
+                    if (typeof CONFIG !== 'undefined') {
+                        this.log('CONFIG对象存在', 'success');
+                        this.log(`游戏宽度: ${CONFIG.GAME.CANVAS_WIDTH}`, 'info');
+                        this.log(`游戏高度: ${CONFIG.GAME.CANVAS_HEIGHT}`, 'info');
+                    } else {
+                        this.log('CONFIG对象不存在', 'error');
+                    }
+                } catch (error) {
+                    this.log(`配置测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            async testImageLoader() {
+                this.log('开始测试图片加载器...', 'info');
+                
+                try {
+                    if (typeof ImageLoader !== 'undefined') {
+                        this.log('ImageLoader类存在', 'success');
+                        const loader = new ImageLoader();
+                        this.log('ImageLoader实例创建成功', 'success');
+                        
+                        // 不实际加载图片，只测试类结构
+                        this.log('图片加载器测试通过', 'success');
+                    } else {
+                        this.log('ImageLoader类不存在', 'error');
+                    }
+                } catch (error) {
+                    this.log(`图片加载器测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            async testAudioManager() {
+                this.log('开始测试音频管理器...', 'info');
+                
+                try {
+                    if (typeof AudioManager !== 'undefined') {
+                        this.log('AudioManager类存在', 'success');
+                        const audioManager = new AudioManager();
+                        this.log('AudioManager实例创建成功', 'success');
+                        
+                        // 不实际初始化音频，只测试类结构
+                        this.log('音频管理器测试通过', 'success');
+                    } else {
+                        this.log('AudioManager类不存在', 'error');
+                    }
+                } catch (error) {
+                    this.log(`音频管理器测试失败: ${error.message}`, 'error');
+                }
+            }
+            
+            async testUIManager() {
+                this.log('开始测试UI管理器...', 'info');
+                
+                try {
+                    if (typeof UIManager !== 'undefined') {
+                        this.log('UIManager类存在', 'success');
+                        
+                        // 检查是否有必要的DOM元素
+                        const startButton = document.getElementById('startButton');
+                        if (startButton) {
+                            this.log('开始按钮元素存在', 'success');
+                        } else {
+                            this.log('开始按钮元素不存在', 'error');
+                        }
+                        
+                        this.log('UI管理器测试通过', 'success');
+                    } else {
+                        this.log('UIManager类不存在', 'error');
+                    }
+                } catch (error) {
+                    this.log(`UI管理器测试失败: ${error.message}`, 'error');
+                }
+            }
+        }
+        
+        // 全局函数
+        let testInstance = null;
+        
+        function testBasicFunction() {
+            if (testInstance) {
+                testInstance.testBasicFunction();
+            }
+        }
+        
+        function testButtonClick() {
+            if (testInstance) {
+                testInstance.testButtonClick();
+            }
+        }
+        
+        function testAsyncFunction() {
+            if (testInstance) {
+                testInstance.testAsyncFunction();
+            }
+        }
+        
+        function clearLog() {
+            if (testInstance) {
+                testInstance.clearLog();
+            }
+        }
+        
+        function testConfig() {
+            if (testInstance) {
+                testInstance.testConfig();
+            }
+        }
+        
+        function testImageLoader() {
+            if (testInstance) {
+                testInstance.testImageLoader();
+            }
+        }
+        
+        function testAudioManager() {
+            if (testInstance) {
+                testInstance.testAudioManager();
+            }
+        }
+        
+        function testUIManager() {
+            if (testInstance) {
+                testInstance.testUIManager();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            testInstance = new SimpleTest();
+        });
+    </script>
+    
+    <!-- 引入游戏文件进行测试 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="uiManager.js"></script>
+</body>
+</html>

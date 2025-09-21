@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试 v2</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #5a4a2d;
+            border-left: 4px solid #ff9800;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .fix-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .fix-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #4ecdc4;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .fix-card h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+        .fix-item {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .bullet-fix { border-color: #4caf50; }
+        .monster-fix { border-color: #ff9800; }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .stats-table th, .stats-table td {
+            border: 1px solid #4ecdc4;
+            padding: 8px;
+            text-align: center;
+        }
+        .stats-table th {
+            background-color: rgba(78, 205, 196, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 修复验证测试 v2</h1>
+    
+    <div class="test-section">
+        <h2>📋 修复内容总结</h2>
+        <div class="fix-summary">
+            <div class="fix-card bullet-fix">
+                <h3>🔫 子弹消失问题修复</h3>
+                <div class="fix-item">✅ 问题: 子弹打着打着就消失了</div>
+                <div class="fix-item">✅ 原因: 边界检查逻辑错误</div>
+                <div class="fix-item">✅ 修复: 调整边界检查范围</div>
+                <div class="fix-item">✅ 效果: 子弹向上移动5000像素后才销毁</div>
+            </div>
+            <div class="fix-card monster-fix">
+                <h3>👹 怪物重叠问题修复</h3>
+                <div class="fix-item">✅ 问题: 怪物大量重叠</div>
+                <div class="fix-item">✅ 原因: 间距设置过大(100px)</div>
+                <div class="fix-item">✅ 修复: 调整为50像素最小间距</div>
+                <div class="fix-item">✅ 效果: 怪物间保持50像素间距</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 新关卡配置</h2>
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>关卡</th>
+                    <th>难度</th>
+                    <th>时长</th>
+                    <th>油桶怪</th>
+                    <th>UFO炮塔</th>
+                    <th>巨型怪</th>
+                    <th>总怪物</th>
+                    <th>密度</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>关卡1</td>
+                    <td>简单</td>
+                    <td>120秒</td>
+                    <td>40</td>
+                    <td>20</td>
+                    <td>8</td>
+                    <td><strong>68</strong></td>
+                    <td>0.57/秒</td>
+                </tr>
+                <tr>
+                    <td>关卡2</td>
+                    <td>中等</td>
+                    <td>180秒</td>
+                    <td>55</td>
+                    <td>35</td>
+                    <td>15</td>
+                    <td><strong>105</strong></td>
+                    <td>0.58/秒</td>
+                </tr>
+                <tr>
+                    <td>关卡3</td>
+                    <td>困难</td>
+                    <td>240秒</td>
+                    <td>70</td>
+                    <td>50</td>
+                    <td>25</td>
+                    <td><strong>145</strong></td>
+                    <td>0.60/秒</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 测试功能</h2>
+        <button onclick="testBulletFix()">测试子弹修复</button>
+        <button onclick="testMonsterSpacing()">测试怪物间距</button>
+        <button onclick="testLevelConfig()">测试关卡配置</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function addResult(type, title, message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `
+                <div class="test-result ${type}">
+                    <strong>[${timestamp}] ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function testBulletFix() {
+            log('🔫 开始测试子弹修复...');
+            
+            // 模拟子弹边界检查
+            const bulletTests = [
+                { y: -1000, expected: '存活', description: '子弹向上移动1000像素' },
+                { y: -3000, expected: '存活', description: '子弹向上移动3000像素' },
+                { y: -5000, expected: '存活', description: '子弹向上移动5000像素（边界）' },
+                { y: -5001, expected: '销毁', description: '子弹向上移动5001像素（超出边界）' },
+                { y: 1000, expected: '存活', description: '子弹在屏幕内' },
+                { y: 3000, expected: '存活', description: '子弹在屏幕下方1000像素' },
+                { y: 4000, expected: '销毁', description: '子弹在屏幕下方2000像素（超出边界）' }
+            ];
+            
+            let allPassed = true;
+            bulletTests.forEach(test => {
+                let result;
+                if (test.y < -5000 || test.y > 2560 + 2000) {
+                    result = '销毁';
+                } else {
+                    result = '存活';
+                }
+                
+                const passed = result === test.expected;
+                allPassed = allPassed && passed;
+                
+                log(`${test.description}: ${result} ${passed ? '✅' : '❌'}`);
+            });
+            
+            if (allPassed) {
+                log('✅ 子弹边界检查测试通过');
+                addResult('pass', '子弹修复', '子弹边界检查逻辑正确');
+            } else {
+                log('❌ 子弹边界检查测试失败');
+                addResult('warning', '子弹修复', '子弹边界检查逻辑有问题');
+            }
+        }
+
+        function testMonsterSpacing() {
+            log('👹 开始测试怪物间距...');
+            
+            // 模拟怪物间距计算
+            const monsterTypes = [
+                { name: 'BarrelMonster', width: 300, height: 450 },
+                { name: 'UFOTurret', width: 400, height: 600 },
+                { name: 'GiantMelee', width: 500, height: 750 }
+            ];
+            
+            const spacingTests = [
+                { type1: 'BarrelMonster', type2: 'BarrelMonster', expected: 350 },
+                { type1: 'BarrelMonster', type2: 'UFOTurret', expected: 400 },
+                { type1: 'BarrelMonster', type2: 'GiantMelee', expected: 450 },
+                { type1: 'UFOTurret', type2: 'UFOTurret', expected: 450 },
+                { type1: 'UFOTurret', type2: 'GiantMelee', expected: 500 },
+                { type1: 'GiantMelee', type2: 'GiantMelee', expected: 550 }
+            ];
+            
+            let allPassed = true;
+            spacingTests.forEach(test => {
+                const monster1 = monsterTypes.find(m => m.name === test.type1);
+                const monster2 = monsterTypes.find(m => m.name === test.type2);
+                
+                const minDistance = (monster1.width + monster2.width) / 2 + 50;
+                const passed = minDistance === test.expected;
+                allPassed = allPassed && passed;
+                
+                log(`${test.type1} + ${test.type2}: ${minDistance}px ${passed ? '✅' : '❌'}`);
+            });
+            
+            // 测试生成区域
+            const playAreaLeft = 360;
+            const spawnWidth = 660; // 720 - 60
+            const spawnLeft = 390; // 360 + 30
+            
+            log(`生成区域: X=${spawnLeft} 到 ${spawnLeft + spawnWidth} (宽度${spawnWidth})`);
+            
+            // 检查最大怪物组合是否能容纳
+            const maxRequiredSpace = 550; // GiantMelee + GiantMelee
+            const availableSpace = spawnWidth;
+            
+            if (availableSpace >= maxRequiredSpace) {
+                log(`✅ 可用空间${availableSpace}px >= 最大需求${maxRequiredSpace}px`);
+                addResult('pass', '怪物间距', '生成区域足够容纳最大怪物组合');
+            } else {
+                log(`❌ 可用空间${availableSpace}px < 最大需求${maxRequiredSpace}px`);
+                addResult('warning', '怪物间距', '生成区域无法容纳最大怪物组合');
+                allPassed = false;
+            }
+            
+            if (allPassed) {
+                log('✅ 怪物间距测试通过');
+                addResult('pass', '怪物间距', '怪物间距计算正确，生成区域充足');
+            } else {
+                log('❌ 怪物间距测试失败');
+                addResult('warning', '怪物间距', '怪物间距计算或生成区域有问题');
+            }
+        }
+
+        function testLevelConfig() {
+            log('📋 开始测试关卡配置...');
+            
+            const levels = [
+                { level: 1, barrel: 40, ufo: 20, giant: 8, total: 68, duration: 120 },
+                { level: 2, barrel: 55, ufo: 35, giant: 15, total: 105, duration: 180 },
+                { level: 3, barrel: 70, ufo: 50, giant: 25, total: 145, duration: 240 }
+            ];
+            
+            let allPassed = true;
+            levels.forEach(level => {
+                const density = (level.total / level.duration).toFixed(2);
+                const barrelRatio = (level.barrel / level.total * 100).toFixed(1);
+                const ufoRatio = (level.ufo / level.total * 100).toFixed(1);
+                const giantRatio = (level.giant / level.total * 100).toFixed(1);
+                
+                log(`关卡${level.level}: 总怪物=${level.total}, 密度=${density}/秒`);
+                log(`  油桶怪: ${level.barrel}个 (${barrelRatio}%), UFO: ${level.ufo}个 (${ufoRatio}%), 巨型怪: ${level.giant}个 (${giantRatio}%)`);
+                
+                // 检查配置是否合理
+                const isReasonable = level.total >= 60 && level.total <= 150 && 
+                                   barrelRatio >= 50 && ufoRatio >= 15 && giantRatio >= 5;
+                
+                if (!isReasonable) allPassed = false;
+                
+                addResult(isReasonable ? 'pass' : 'warning', `关卡${level.level}配置`, 
+                    `总怪物: ${level.total} | 密度: ${density}/秒 | 分布: ${barrelRatio}%/${ufoRatio}%/${giantRatio}% ${isReasonable ? '✅' : '⚠️'}`);
+            });
+            
+            if (allPassed) {
+                log('✅ 关卡配置测试通过');
+                addResult('pass', '关卡配置', '所有关卡配置合理');
+            } else {
+                log('❌ 关卡配置测试失败');
+                addResult('warning', '关卡配置', '部分关卡配置不合理');
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🚀 修复验证测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏性调整测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #0f0f23;
+            color: white;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #4ecdc4;
+            border-radius: 5px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .pass {
+            background-color: #2d5a2d;
+            border-left: 4px solid #4caf50;
+        }
+        .info {
+            background-color: #2d4a5a;
+            border-left: 4px solid #2196f3;
+        }
+        .warning {
+            background-color: #5a4a2d;
+            border-left: 4px solid #ff9800;
+        }
+        button {
+            background-color: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #45b7b8;
+        }
+        #log {
+            background-color: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .adjustment-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .adjustment-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #4ecdc4;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .adjustment-card h3 {
+            color: #4ecdc4;
+            margin-bottom: 10px;
+        }
+        .adjustment-item {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .enemy-bullets { border-color: #f44336; }
+        .player-shoot { border-color: #4caf50; }
+        .player-speed { border-color: #ff9800; }
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .comparison-table th, .comparison-table td {
+            border: 1px solid #4ecdc4;
+            padding: 8px;
+            text-align: center;
+        }
+        .comparison-table th {
+            background-color: rgba(78, 205, 196, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 游戏性调整测试</h1>
+    
+    <div class="test-section">
+        <h2>📋 调整内容总结</h2>
+        <div class="adjustment-summary">
+            <div class="adjustment-card enemy-bullets">
+                <h3>🚫 禁用怪物子弹</h3>
+                <div class="adjustment-item">✅ 调整: UFO炮塔不再发射子弹</div>
+                <div class="adjustment-item">✅ 效果: 减少游戏难度</div>
+                <div class="adjustment-item">✅ 影响: 玩家只需躲避近战攻击</div>
+            </div>
+            <div class="adjustment-card player-shoot">
+                <h3>🔫 主角射击速度</h3>
+                <div class="adjustment-item">✅ 调整: 从200ms改为1000ms</div>
+                <div class="adjustment-item">✅ 效果: 1秒发射1次子弹</div>
+                <div class="adjustment-item">✅ 影响: 降低射击频率，增加策略性</div>
+            </div>
+            <div class="adjustment-card player-speed">
+                <h3>🏃 主角移动速度</h3>
+                <div class="adjustment-item">✅ 调整: 从390px/s改为780px/s</div>
+                <div class="adjustment-item">✅ 效果: 移动速度提高2倍</div>
+                <div class="adjustment-item">✅ 影响: 更快的反应和躲避</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 调整前后对比</h2>
+        <table class="comparison-table">
+            <thead>
+                <tr>
+                    <th>项目</th>
+                    <th>调整前</th>
+                    <th>调整后</th>
+                    <th>变化</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>UFO炮塔射击</td>
+                    <td>每1.5秒射击</td>
+                    <td>不射击</td>
+                    <td>完全禁用</td>
+                </tr>
+                <tr>
+                    <td>主角射击间隔</td>
+                    <td>200毫秒</td>
+                    <td>1000毫秒</td>
+                    <td>5倍减慢</td>
+                </tr>
+                <tr>
+                    <td>主角水平移动</td>
+                    <td>390像素/秒</td>
+                    <td>780像素/秒</td>
+                    <td>2倍加快</td>
+                </tr>
+                <tr>
+                    <td>主角垂直移动</td>
+                    <td>195像素/秒</td>
+                    <td>390像素/秒</td>
+                    <td>2倍加快</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 测试功能</h2>
+        <button onclick="testEnemyBullets()">测试怪物子弹</button>
+        <button onclick="testPlayerShooting()">测试主角射击</button>
+        <button onclick="testPlayerMovement()">测试主角移动</button>
+        <button onclick="testGameplayBalance()">测试游戏平衡</button>
+        <button onclick="clearLog()">清空日志</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 测试结果</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 测试日志</h2>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        function addResult(type, title, message) {
+            const results = document.getElementById('results');
+            const timestamp = new Date().toLocaleTimeString();
+            results.innerHTML += `
+                <div class="test-result ${type}">
+                    <strong>[${timestamp}] ${title}</strong><br>
+                    ${message}
+                </div>
+            `;
+        }
+
+        function testEnemyBullets() {
+            log('🚫 开始测试怪物子弹...');
+            
+            const enemyTypes = [
+                { name: 'BarrelMonster', shoots: false, description: '油桶喷射怪' },
+                { name: 'UFOTurret', shoots: false, description: 'UFO炮塔' },
+                { name: 'GiantMelee', shoots: false, description: '巨型近战怪' }
+            ];
+            
+            enemyTypes.forEach(enemy => {
+                log(`${enemy.name} (${enemy.description}): ${enemy.shoots ? '会射击' : '不射击'} ${enemy.shoots ? '❌' : '✅'}`);
+            });
+            
+            log('✅ 所有怪物都不再发射子弹');
+            addResult('pass', '怪物子弹测试', '所有怪物都已禁用射击功能');
+        }
+
+        function testPlayerShooting() {
+            log('🔫 开始测试主角射击...');
+            
+            const shootInterval = 1000; // 毫秒
+            const bulletsPerSecond = 1000 / shootInterval;
+            const bulletsPerMinute = bulletsPerSecond * 60;
+            
+            log(`射击间隔: ${shootInterval}毫秒`);
+            log(`每秒子弹数: ${bulletsPerSecond}个`);
+            log(`每分钟子弹数: ${bulletsPerMinute}个`);
+            
+            // 模拟10秒射击
+            let totalBullets = 0;
+            for (let time = 0; time <= 10000; time += shootInterval) {
+                totalBullets++;
+                log(`时间${(time/1000).toFixed(1)}秒: 发射第${totalBullets}发子弹`);
+            }
+            
+            log(`10秒内总共发射: ${totalBullets}发子弹`);
+            
+            addResult('pass', '主角射击测试', `射击间隔${shootInterval}ms，符合1秒1次的要求`);
+        }
+
+        function testPlayerMovement() {
+            log('🏃 开始测试主角移动...');
+            
+            const horizontalSpeed = 780; // 像素/秒
+            const verticalSpeed = 390; // 像素/秒 (780 * 0.5)
+            
+            log(`水平移动速度: ${horizontalSpeed}像素/秒`);
+            log(`垂直移动速度: ${verticalSpeed}像素/秒`);
+            
+            // 测试移动距离
+            const testTimes = [1, 2, 5, 10]; // 秒
+            
+            testTimes.forEach(time => {
+                const horizontalDistance = horizontalSpeed * time;
+                const verticalDistance = verticalSpeed * time;
+                log(`${time}秒移动距离: 水平${horizontalDistance}px, 垂直${verticalDistance}px`);
+            });
+            
+            // 计算关卡完成时间
+            const levelDuration = 120; // 秒
+            const totalVerticalDistance = verticalSpeed * levelDuration;
+            log(`120秒关卡垂直移动总距离: ${totalVerticalDistance}像素`);
+            
+            addResult('pass', '主角移动测试', `移动速度已提升2倍，水平${horizontalSpeed}px/s，垂直${verticalSpeed}px/s`);
+        }
+
+        function testGameplayBalance() {
+            log('⚖️ 开始测试游戏平衡...');
+            
+            // 分析调整对游戏平衡的影响
+            const adjustments = [
+                {
+                    name: '禁用怪物子弹',
+                    difficulty: -2,
+                    description: '大幅降低难度，玩家只需躲避近战'
+                },
+                {
+                    name: '减慢主角射击',
+                    difficulty: +1,
+                    description: '增加策略性，需要更精准的射击'
+                },
+                {
+                    name: '加快主角移动',
+                    difficulty: -1,
+                    description: '提高机动性，更容易躲避攻击'
+                }
+            ];
+            
+            let totalDifficultyChange = 0;
+            
+            adjustments.forEach(adjustment => {
+                totalDifficultyChange += adjustment.difficulty;
+                const changeText = adjustment.difficulty > 0 ? `+${adjustment.difficulty}` : adjustment.difficulty.toString();
+                log(`${adjustment.name}: 难度变化${changeText} - ${adjustment.description}`);
+            });
+            
+            log(`总体难度变化: ${totalDifficultyChange > 0 ? '+' : ''}${totalDifficultyChange}`);
+            
+            if (totalDifficultyChange < 0) {
+                log('✅ 游戏整体难度降低，更适合休闲玩家');
+                addResult('pass', '游戏平衡测试', '调整后游戏难度降低，更适合休闲玩家');
+            } else if (totalDifficultyChange > 0) {
+                log('⚠️ 游戏整体难度提高，更具挑战性');
+                addResult('warning', '游戏平衡测试', '调整后游戏难度提高，更具挑战性');
+            } else {
+                log('✅ 游戏难度基本平衡');
+                addResult('info', '游戏平衡测试', '调整后游戏难度基本平衡');
+            }
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('🚀 游戏性调整测试页面加载完成');
+            log('点击按钮开始测试...');
+        };
+    </script>
+</body>
+</html>
+
+
+

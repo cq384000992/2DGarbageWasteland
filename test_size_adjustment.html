@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大小调整测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        .size-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .size-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .size-item h3 {
+            color: #4ecdc4;
+            margin-top: 0;
+        }
+        
+        .size-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .size-box {
+            border: 2px solid;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .player-box {
+            border-color: #4ecdc4;
+            background: rgba(78, 205, 196, 0.3);
+        }
+        
+        .barrel-box {
+            border-color: #8B4513;
+            background: rgba(139, 69, 19, 0.3);
+        }
+        
+        .ufo-box {
+            border-color: #9370DB;
+            background: rgba(147, 112, 219, 0.3);
+        }
+        
+        .giant-box {
+            border-color: #8B0000;
+            background: rgba(139, 0, 0, 0.3);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>大小调整测试</h1>
+        
+        <div class="test-section">
+            <h2>大小对比</h2>
+            <p>显示调整前后的尺寸对比（红色为原始大小，蓝色为调整后大小）</p>
+            
+            <div class="size-comparison">
+                <div class="size-item">
+                    <h3>主角 (Player)</h3>
+                    <div class="size-display">
+                        <div class="size-box player-box" style="width: 400px; height: 600px; border-color: #ff6b6b; background: rgba(255, 107, 107, 0.3);">
+                            原始: 400×600
+                        </div>
+                        <div class="size-box player-box" style="width: 267px; height: 400px; left: 50px; top: 50px;">
+                            新: 267×400
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="size-item">
+                    <h3>油桶喷射怪 (BarrelMonster)</h3>
+                    <div class="size-display">
+                        <div class="size-box barrel-box" style="width: 300px; height: 450px; border-color: #ff6b6b; background: rgba(255, 107, 107, 0.3);">
+                            原始: 300×450
+                        </div>
+                        <div class="size-box barrel-box" style="width: 200px; height: 300px; left: 50px; top: 50px;">
+                            新: 200×300
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="size-item">
+                    <h3>灯头飞碟炮塔 (UFOTurret)</h3>
+                    <div class="size-display">
+                        <div class="size-box ufo-box" style="width: 400px; height: 600px; border-color: #ff6b6b; background: rgba(255, 107, 107, 0.3);">
+                            原始: 400×600
+                        </div>
+                        <div class="size-box ufo-box" style="width: 267px; height: 400px; left: 50px; top: 50px;">
+                            新: 267×400
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="size-item">
+                    <h3>巨型近战怪 (GiantMelee)</h3>
+                    <div class="size-display">
+                        <div class="size-box giant-box" style="width: 500px; height: 750px; border-color: #ff6b6b; background: rgba(255, 107, 107, 0.3);">
+                            原始: 500×750
+                        </div>
+                        <div class="size-box giant-box" style="width: 333px; height: 500px; left: 50px; top: 50px;">
+                            新: 333×500
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>配置验证</h2>
+            <button onclick="checkConfig()">检查配置</button>
+            <button onclick="testGameObjects()">测试游戏对象</button>
+            <button onclick="clearLog()">清除日志</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>实际游戏测试</h2>
+            <p>点击下面的按钮启动游戏，验证大小调整效果：</p>
+            <button onclick="startGame()">启动游戏测试</button>
+            <div id="gameContainer" style="margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <script>
+        class SizeTest {
+            constructor() {
+                this.logs = [];
+                this.initialize();
+            }
+            
+            initialize() {
+                this.log('大小调整测试系统初始化完成');
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近50条日志
+                if (this.logs.length > 50) {
+                    this.logs.shift();
+                }
+                
+                this.updateLogDisplay();
+            }
+            
+            updateLogDisplay() {
+                const logElement = document.getElementById('testLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            checkConfig() {
+                this.log('=== 配置检查 ===');
+                
+                try {
+                    if (typeof CONFIG !== 'undefined') {
+                        // 检查主角配置
+                        const player = CONFIG.PLAYER;
+                        this.log(`主角尺寸: ${player.WIDTH} × ${player.HEIGHT}`);
+                        this.log(`主角起始位置: (${player.START_X}, ${player.START_Y})`);
+                        
+                        // 检查怪物配置
+                        const enemies = CONFIG.ENEMIES;
+                        this.log(`油桶怪尺寸: ${enemies.BARREL_MONSTER.WIDTH} × ${enemies.BARREL_MONSTER.HEIGHT}`);
+                        this.log(`飞碟怪尺寸: ${enemies.UFO_TURRET.WIDTH} × ${enemies.UFO_TURRET.HEIGHT}`);
+                        this.log(`巨型怪尺寸: ${enemies.GIANT_MELEE.WIDTH} × ${enemies.GIANT_MELEE.HEIGHT}`);
+                        
+                        // 验证尺寸比例
+                        this.log('=== 尺寸比例验证 ===');
+                        this.log(`主角: 267/400 = ${(267/400).toFixed(3)} (应为 0.667)`);
+                        this.log(`油桶怪: 200/300 = ${(200/300).toFixed(3)} (应为 0.667)`);
+                        this.log(`飞碟怪: 267/400 = ${(267/400).toFixed(3)} (应为 0.667)`);
+                        this.log(`巨型怪: 333/500 = ${(333/500).toFixed(3)} (应为 0.667)`);
+                        
+                        this.log('配置检查完成');
+                    } else {
+                        this.log('CONFIG未定义，请确保config.js已加载');
+                    }
+                } catch (error) {
+                    this.log('配置检查失败: ' + error.message);
+                }
+            }
+            
+            testGameObjects() {
+                this.log('=== 游戏对象测试 ===');
+                
+                try {
+                    if (typeof Player !== 'undefined' && typeof ImageLoader !== 'undefined') {
+                        // 创建图像加载器
+                        const imageLoader = new ImageLoader();
+                        
+                        // 创建主角实例
+                        const player = new Player(100, 100, imageLoader);
+                        this.log(`主角实例尺寸: ${player.width} × ${player.height}`);
+                        this.log(`主角碰撞盒: ${JSON.stringify(player.getBounds())}`);
+                        
+                        // 创建怪物实例
+                        if (typeof BarrelMonster !== 'undefined') {
+                            const barrelMonster = new BarrelMonster(200, 200, imageLoader);
+                            this.log(`油桶怪实例尺寸: ${barrelMonster.width} × ${barrelMonster.height}`);
+                        }
+                        
+                        if (typeof UFOTurret !== 'undefined') {
+                            const ufoTurret = new UFOTurret(300, 300, imageLoader);
+                            this.log(`飞碟怪实例尺寸: ${ufoTurret.width} × ${ufoTurret.height}`);
+                        }
+                        
+                        if (typeof GiantMelee !== 'undefined') {
+                            const giantMelee = new GiantMelee(400, 400, imageLoader);
+                            this.log(`巨型怪实例尺寸: ${giantMelee.width} × ${giantMelee.height}`);
+                        }
+                        
+                        this.log('游戏对象测试完成');
+                    } else {
+                        this.log('游戏对象类未定义，请确保gameObjects.js已加载');
+                    }
+                } catch (error) {
+                    this.log('游戏对象测试失败: ' + error.message);
+                }
+            }
+            
+            clearLog() {
+                this.logs = [];
+                this.updateLogDisplay();
+                this.log('日志已清除');
+            }
+            
+            startGame() {
+                this.log('启动游戏测试...');
+                
+                try {
+                    const gameContainer = document.getElementById('gameContainer');
+                    if (gameContainer) {
+                        // 创建iframe加载游戏
+                        const iframe = document.createElement('iframe');
+                        iframe.src = 'index.html';
+                        iframe.style.width = '100%';
+                        iframe.style.height = '600px';
+                        iframe.style.border = '2px solid #4ecdc4';
+                        iframe.style.borderRadius = '10px';
+                        
+                        iframe.onload = () => {
+                            this.log('游戏页面加载完成');
+                        };
+                        
+                        iframe.onerror = () => {
+                            this.log('游戏页面加载失败');
+                        };
+                        
+                        gameContainer.innerHTML = '';
+                        gameContainer.appendChild(iframe);
+                        
+                        this.log('游戏iframe已创建');
+                    }
+                } catch (error) {
+                    this.log('启动游戏失败: ' + error.message);
+                }
+            }
+        }
+        
+        // 全局变量
+        let sizeTest = null;
+        
+        // 全局函数
+        function checkConfig() {
+            if (sizeTest) {
+                sizeTest.checkConfig();
+            }
+        }
+        
+        function testGameObjects() {
+            if (sizeTest) {
+                sizeTest.testGameObjects();
+            }
+        }
+        
+        function clearLog() {
+            if (sizeTest) {
+                sizeTest.clearLog();
+            }
+        }
+        
+        function startGame() {
+            if (sizeTest) {
+                sizeTest.startGame();
+            }
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            sizeTest = new SizeTest();
+        });
+        
+        // 捕获全局错误
+        window.addEventListener('error', (event) => {
+            console.error('全局错误:', event.error);
+            if (sizeTest) {
+                sizeTest.log('全局错误: ' + event.error.message);
+            }
+        });
+    </script>
+    
+    <!-- 加载游戏文件 -->
+    <script src="config.js"></script>
+    <script src="imageLoader.js"></script>
+    <script src="audioManager.js"></script>
+    <script src="camera.js"></script>
+    <script src="gameObjects.js"></script>
+    <script src="inputHandler.js"></script>
+    <script src="uiManager.js"></script>
+    <script src="gameEngine.js"></script>
+</body>
+</html>
