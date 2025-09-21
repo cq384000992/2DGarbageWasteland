@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏引擎测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>游戏引擎测试</h1>
+        
+        <div class="test-section">
+            <h2>直接测试游戏引擎</h2>
+            <p>这个页面直接加载游戏引擎文件，测试是否有语法错误。</p>
+            <button onclick="testGameEngine()">测试游戏引擎</button>
+            <button onclick="clearLog()">清空日志</button>
+            <div class="log" id="testLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>状态显示</h2>
+            <div id="statusDisplay" class="status info">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const log = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `\n[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').textContent = '日志已清空...';
+        }
+        
+        function testGameEngine() {
+            log('开始测试游戏引擎...');
+            
+            // 检查是否已经加载了gameEngine.js
+            if (typeof GameEngine !== 'undefined') {
+                log('✅ GameEngine类已存在');
+                log(`GameEngine类型: ${typeof GameEngine}`);
+                document.getElementById('statusDisplay').textContent = 'GameEngine类存在';
+                document.getElementById('statusDisplay').className = 'status success';
+            } else {
+                log('❌ GameEngine类不存在，尝试加载...');
+                
+                // 动态加载gameEngine.js
+                const script = document.createElement('script');
+                script.src = 'gameEngine.js';
+                script.onload = () => {
+                    log('✅ gameEngine.js 脚本加载成功');
+                    
+                    // 等待一下让脚本完全执行
+                    setTimeout(() => {
+                        if (typeof GameEngine !== 'undefined') {
+                            log('✅ GameEngine类加载成功');
+                            log(`GameEngine类型: ${typeof GameEngine}`);
+                            document.getElementById('statusDisplay').textContent = 'GameEngine类加载成功';
+                            document.getElementById('statusDisplay').className = 'status success';
+                        } else {
+                            log('❌ GameEngine类仍然不存在');
+                            document.getElementById('statusDisplay').textContent = 'GameEngine类加载失败';
+                            document.getElementById('statusDisplay').className = 'status error';
+                        }
+                    }, 100);
+                };
+                script.onerror = (event) => {
+                    log('❌ gameEngine.js 脚本加载失败');
+                    document.getElementById('statusDisplay').textContent = '脚本加载失败';
+                    document.getElementById('statusDisplay').className = 'status error';
+                };
+                
+                document.head.appendChild(script);
+            }
+        }
+        
+        // 错误捕获
+        window.addEventListener('error', function(event) {
+            log(`❌ 页面错误: ${event.error ? event.error.message : event.message}`);
+            log(`错误文件: ${event.filename}:${event.lineno}:${event.colno}`);
+            if (event.error && event.error.stack) {
+                log(`错误堆栈: ${event.error.stack}`);
+            }
+        });
+        
+        window.addEventListener('unhandledrejection', function(event) {
+            log(`❌ Promise拒绝: ${event.reason}`);
+        });
+        
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            log('页面加载完成，准备测试...');
+        });
+        
+        log('游戏引擎测试页面已加载');
+    </script>
+</body>
+</html>

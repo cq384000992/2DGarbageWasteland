@@ -199,9 +199,7 @@ class Player extends GameObject {
         const currentTime = Date.now();
         if (currentTime - this.lastShotTime >= this.shootInterval) {
             this.lastShotTime = currentTime;
-            if (CONFIG.DEBUG.ENABLED) {
-                console.log(`射击: 间隔=${currentTime - (this.lastShotTime - this.shootInterval)}, 目标间隔=${this.shootInterval}, 当前时间=${currentTime}, 上次射击=${this.lastShotTime}`);
-            }
+            // 射击成功
             return new Bullet(
                 this.x + this.width / 2 - CONFIG.PLAYER.BULLET_WIDTH / 2,
                 this.y - CONFIG.PLAYER.BULLET_HEIGHT, // 子弹在玩家上方创建
@@ -273,9 +271,7 @@ class Bullet extends GameObject {
             this.y > CONFIG.GAME.CANVAS_HEIGHT + 1000 ||  // 子弹超出屏幕下边界1000像素时销毁
             this.x + this.width < -1000 ||  // 子弹超出屏幕左边界1000像素时销毁
             this.x > CONFIG.GAME.CANVAS_WIDTH + 1000) {  // 子弹超出屏幕右边界1000像素时销毁
-            if (CONFIG.DEBUG.ENABLED && this.owner === 'player') {
-                console.log(`子弹超出边界销毁: 位置(${this.x.toFixed(1)}, ${this.y.toFixed(1)}), 初始位置(${this.initialY.toFixed(1)}), 边界: ${maxY.toFixed(1)}, 射程: ${maxFlightTime}秒`);
-            }
+            // 子弹超出边界销毁
             this.destroy();
         }
     }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaScript执行诊断</title>
+    <title>基础测试</title>
     <style>
         body {
             margin: 0;
@@ -89,22 +89,15 @@
 </head>
 <body>
     <div class="container">
-        <h1>JavaScript执行诊断</h1>
+        <h1>基础JavaScript测试</h1>
         
         <div class="test-section">
-            <h2>基础测试</h2>
-            <p>这个页面用于诊断JavaScript是否能够正常执行。</p>
-            <button onclick="testBasicJS()">测试基础JavaScript</button>
-            <button onclick="testConsole()">测试控制台输出</button>
+            <h2>基础功能测试</h2>
+            <p>这个页面用于测试最基本的JavaScript功能是否正常。</p>
+            <button onclick="testBasicFunction()">测试基础函数</button>
             <button onclick="testAlert()">测试弹窗</button>
+            <button onclick="testConsole()">测试控制台</button>
             <div class="log" id="testLog">等待测试...</div>
-        </div>
-        
-        <div class="test-section">
-            <h2>文件加载测试</h2>
-            <button onclick="testFileLoading()">测试文件加载</button>
-            <button onclick="testGameFiles()">测试游戏文件</button>
-            <div class="log" id="fileLog">等待测试...</div>
         </div>
         
         <div class="test-section">
@@ -123,7 +116,7 @@
         document.getElementById('statusDisplay').textContent = 'JavaScript执行正常';
         document.getElementById('statusDisplay').className = 'status success';
         
-        function testBasicJS() {
+        function testBasicFunction() {
             console.log('基础JavaScript测试开始');
             const log = document.getElementById('testLog');
             log.textContent += '\n[测试] 基础JavaScript功能正常';
@@ -145,85 +138,6 @@
             const log = document.getElementById('testLog');
             log.textContent += '\n[测试] 弹窗测试完成';
             log.scrollTop = log.scrollHeight;
-        }
-        
-        function testFileLoading() {
-            console.log('开始测试文件加载...');
-            const fileLog = document.getElementById('fileLog');
-            fileLog.textContent = '开始测试文件加载...\n';
-            
-            // 测试各个游戏文件
-            const files = [
-                'config.js',
-                'imageLoader.js', 
-                'audioManager.js',
-                'camera.js',
-                'gameObjects.js',
-                'inputHandler.js',
-                'uiManager.js',
-                'gameEngine.js'
-            ];
-            
-            let loadedCount = 0;
-            let errorCount = 0;
-            
-            files.forEach((file, index) => {
-                const script = document.createElement('script');
-                script.src = file;
-                script.onload = () => {
-                    loadedCount++;
-                    fileLog.textContent += `✓ ${file} 加载成功\n`;
-                    fileLog.scrollTop = fileLog.scrollHeight;
-                    console.log(`${file} 加载成功`);
-                    
-                    if (loadedCount + errorCount === files.length) {
-                        fileLog.textContent += `\n文件加载完成: ${loadedCount}成功, ${errorCount}失败`;
-                        console.log(`文件加载完成: ${loadedCount}成功, ${errorCount}失败`);
-                    }
-                };
-                script.onerror = () => {
-                    errorCount++;
-                    fileLog.textContent += `✗ ${file} 加载失败\n`;
-                    fileLog.scrollTop = fileLog.scrollHeight;
-                    console.error(`${file} 加载失败`);
-                    
-                    if (loadedCount + errorCount === files.length) {
-                        fileLog.textContent += `\n文件加载完成: ${loadedCount}成功, ${errorCount}失败`;
-                        console.log(`文件加载完成: ${loadedCount}成功, ${errorCount}失败`);
-                    }
-                };
-                document.head.appendChild(script);
-            });
-        }
-        
-        function testGameFiles() {
-            console.log('开始测试游戏文件...');
-            const fileLog = document.getElementById('fileLog');
-            fileLog.textContent = '开始测试游戏文件...\n';
-            
-            // 检查游戏文件是否已加载
-            const gameClasses = [
-                'CONFIG',
-                'ImageLoader', 
-                'AudioManager',
-                'Camera',
-                'Player',
-                'InputHandler',
-                'UIManager',
-                'GameEngine'
-            ];
-            
-            gameClasses.forEach(className => {
-                if (typeof window[className] !== 'undefined') {
-                    fileLog.textContent += `✓ ${className} 类已定义\n`;
-                    console.log(`${className} 类已定义`);
-                } else {
-                    fileLog.textContent += `✗ ${className} 类未定义\n`;
-                    console.warn(`${className} 类未定义`);
-                }
-            });
-            
-            fileLog.scrollTop = fileLog.scrollHeight;
         }
         
         // 页面加载完成后的测试

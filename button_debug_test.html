@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按钮调试测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .test-section h2 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        
+        button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.success {
+            background-color: #2d5a2d;
+            border: 1px solid #4caf50;
+        }
+        
+        .status.error {
+            background-color: #5a2d2d;
+            border: 1px solid #f44336;
+        }
+        
+        .status.info {
+            background-color: #2d4a5a;
+            border: 1px solid #2196f3;
+        }
+        
+        #startButton {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>按钮调试测试</h1>
+        
+        <div class="test-section">
+            <h2>按钮状态检查</h2>
+            <button onclick="checkButtonState()">检查按钮状态</button>
+            <button onclick="testDirectClick()">直接点击测试</button>
+            <button onclick="testEventListeners()">测试事件监听器</button>
+            <div class="log" id="buttonLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>游戏按钮测试</h2>
+            <button id="startButton">开始游戏</button>
+            <div class="log" id="gameLog">等待测试...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>状态显示</h2>
+            <div id="statusDisplay" class="status info">等待测试...</div>
+        </div>
+    </div>
+
+    <script>
+        const buttonLog = document.getElementById('buttonLog');
+        const gameLog = document.getElementById('gameLog');
+        const statusDisplay = document.getElementById('statusDisplay');
+        
+        function log(message, target = 'button') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            console.log(logEntry);
+            
+            const logElement = target === 'game' ? gameLog : buttonLog;
+            logElement.textContent += logEntry + '\n';
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function checkButtonState() {
+            log('=== 检查按钮状态 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                log('✓ 开始按钮存在');
+                
+                // 检查按钮属性
+                const props = {
+                    disabled: startButton.disabled,
+                    type: startButton.type,
+                    id: startButton.id,
+                    className: startButton.className,
+                    innerHTML: startButton.innerHTML
+                };
+                log('按钮属性: ' + JSON.stringify(props, null, 2));
+                
+                // 检查计算样式
+                const styles = getComputedStyle(startButton);
+                const importantStyles = {
+                    display: styles.display,
+                    visibility: styles.visibility,
+                    pointerEvents: styles.pointerEvents,
+                    cursor: styles.cursor,
+                    position: styles.position,
+                    zIndex: styles.zIndex,
+                    opacity: styles.opacity
+                };
+                log('计算样式: ' + JSON.stringify(importantStyles, null, 2));
+                
+                // 检查按钮位置和大小
+                const rect = startButton.getBoundingClientRect();
+                log('按钮位置和大小: ' + JSON.stringify({
+                    top: rect.top,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                    visible: rect.width > 0 && rect.height > 0
+                }, null, 2));
+                
+            } else {
+                log('✗ 开始按钮不存在');
+            }
+            
+            log('=== 按钮状态检查完成 ===');
+        }
+        
+        function testDirectClick() {
+            log('=== 直接点击测试 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                log('尝试直接点击按钮...');
+                try {
+                    startButton.click();
+                    log('✓ 直接点击成功');
+                } catch (error) {
+                    log('✗ 直接点击失败: ' + error.message);
+                }
+            } else {
+                log('✗ 开始按钮不存在');
+            }
+            
+            log('=== 直接点击测试完成 ===');
+        }
+        
+        function testEventListeners() {
+            log('=== 事件监听器测试 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                log('添加测试事件监听器...');
+                
+                // 添加点击事件监听器
+                const clickHandler = (event) => {
+                    log('✓ 点击事件触发！', 'game');
+                    log('事件对象: ' + JSON.stringify({
+                        type: event.type,
+                        target: event.target.id,
+                        currentTarget: event.currentTarget.id,
+                        bubbles: event.bubbles,
+                        cancelable: event.cancelable
+                    }, null, 2), 'game');
+                };
+                
+                startButton.addEventListener('click', clickHandler);
+                log('✓ 点击事件监听器已添加');
+                
+                // 添加鼠标事件监听器
+                const mouseEnterHandler = () => {
+                    log('✓ 鼠标进入事件触发！', 'game');
+                };
+                
+                const mouseLeaveHandler = () => {
+                    log('✓ 鼠标离开事件触发！', 'game');
+                };
+                
+                startButton.addEventListener('mouseenter', mouseEnterHandler);
+                startButton.addEventListener('mouseleave', mouseLeaveHandler);
+                log('✓ 鼠标事件监听器已添加');
+                
+                // 测试鼠标事件
+                log('请将鼠标悬停在"开始游戏"按钮上测试鼠标事件...');
+                
+            } else {
+                log('✗ 开始按钮不存在');
+            }
+            
+            log('=== 事件监听器测试完成 ===');
+        }
+        
+        // 页面加载完成后的检查
+        window.addEventListener('load', function() {
+            log('页面完全加载完成');
+            statusDisplay.textContent = '页面加载完成，可以开始测试';
+            statusDisplay.className = 'status success';
+        });
+        
+        // 错误捕获
+        window.addEventListener('error', function(event) {
+            log('页面错误: ' + event.error.message);
+            statusDisplay.textContent = '页面错误: ' + event.error.message;
+            statusDisplay.className = 'status error';
+        });
+        
+        // 立即执行的检查
+        log('按钮调试测试页面初始化完成');
+        statusDisplay.textContent = '等待测试...';
+    </script>
+</body>
+</html>
+

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>最小化测试</title>
+    <title>最小测试</title>
     <style>
         body {
             margin: 0;
@@ -13,22 +13,40 @@
             font-family: Arial, sans-serif;
         }
         
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #4ecdc4;
+        }
+        
         button {
             background: #4ecdc4;
             color: #0f0f23;
             border: none;
             padding: 15px 30px;
             font-size: 18px;
-            border-radius: 5px;
+            font-weight: bold;
+            border-radius: 10px;
             cursor: pointer;
             margin: 10px;
+            display: block;
+            width: 200px;
+            margin: 10px auto;
+        }
+        
+        button:hover {
+            background: #44a08d;
         }
         
         .log {
             background-color: #1a1a2e;
             padding: 15px;
             border-radius: 5px;
-            margin: 10px 0;
+            margin: 20px 0;
             font-family: monospace;
             font-size: 14px;
             min-height: 100px;
@@ -37,41 +55,29 @@
     </style>
 </head>
 <body>
-    <h1>最小化JavaScript测试</h1>
-    
-    <button onclick="testClick()">点击测试</button>
-    <button onclick="testAlert()">弹窗测试</button>
-    
-    <div class="log" id="log">等待测试...</div>
-    
+    <div class="container">
+        <h1>最小JavaScript测试</h1>
+        
+        <button onclick="testFunction()">点击测试</button>
+        
+        <div class="log" id="logArea">等待测试...</div>
+    </div>
+
     <script>
-        // 立即执行的测试
-        console.log('JavaScript开始执行！');
-        document.getElementById('log').textContent = 'JavaScript已加载，等待测试...';
+        // 立即执行
+        document.getElementById('logArea').textContent = 'JavaScript已加载！';
         
-        function testClick() {
-            console.log('按钮被点击！');
-            const log = document.getElementById('log');
-            log.textContent += '\n按钮被点击！时间：' + new Date().toLocaleTimeString();
+        function testFunction() {
+            document.getElementById('logArea').textContent = '按钮点击成功！JavaScript正常工作！';
+            console.log('按钮点击测试成功');
         }
         
-        function testAlert() {
-            console.log('准备显示弹窗');
-            alert('弹窗测试成功！');
-            console.log('弹窗已关闭');
-        }
-        
-        // 页面加载完成后的测试
+        // 页面加载完成
         window.addEventListener('load', function() {
-            console.log('页面完全加载完成');
-            document.getElementById('log').textContent += '\n页面加载完成！';
+            document.getElementById('logArea').textContent += '\n页面加载完成';
         });
         
-        // 错误捕获
-        window.addEventListener('error', function(event) {
-            console.error('发生错误:', event.error);
-            document.getElementById('log').textContent += '\n错误: ' + event.error.message;
-        });
+        console.log('最小测试页面加载完成');
     </script>
 </body>
 </html>

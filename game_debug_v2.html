@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏调试V2</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 350px;
+            max-height: 500px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            overflow-y: auto;
+            border: 2px solid #4ecdc4;
+        }
+        
+        .debug-panel h3 {
+            margin: 0 0 10px 0;
+            color: #4ecdc4;
+            font-size: 14px;
+        }
+        
+        .debug-log {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .debug-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .debug-controls button {
+            background: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        
+        .debug-controls button:hover {
+            background: #44a08d;
+        }
+        
+        .game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+        }
+        
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .ui-overlay > * {
+            pointer-events: auto;
+        }
+        
+        .health-bar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 200px;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #4ecdc4;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            width: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .health-text {
+            position: absolute;
+            top: 25px;
+            left: 220px;
+            color: #4ecdc4;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .info-card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #4ecdc4;
+            min-width: 120px;
+        }
+        
+        .info-card .label {
+            color: #ffd700;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .audio-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .audio-button {
+            background: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .audio-button:hover {
+            background: #44a08d;
+            transform: scale(1.1);
+        }
+        
+        .volume-slider {
+            width: 100px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .start-screen h1 {
+            font-size: 3rem;
+            color: #4ecdc4;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .start-screen p {
+            font-size: 1.2rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 600px;
+        }
+        
+        .start-screen button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .start-screen button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+        
+        .game-over-screen, .level-complete-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .game-over-screen h2, .level-complete-screen h2 {
+            font-size: 2.5rem;
+            color: #ff6b6b;
+            margin-bottom: 20px;
+        }
+        
+        .game-over-screen p, .level-complete-screen p {
+            font-size: 1.2rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+        
+        .game-over-screen button, .level-complete-screen button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .game-over-screen button:hover, .level-complete-screen button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- 调试面板 -->
+    <div class="debug-panel" id="debugPanel">
+        <h3>游戏调试V2 - 实时监控</h3>
+        <div class="debug-log" id="debugLog">等待初始化...</div>
+        <div class="debug-controls">
+            <button onclick="testButtonClick()">测试按钮点击</button>
+            <button onclick="checkGameState()">检查游戏状态</button>
+            <button onclick="testUIManager()">测试UI管理器</button>
+            <button onclick="testGameEngine()">测试游戏引擎</button>
+            <button onclick="createGameEngine()">手动创建游戏引擎</button>
+            <button onclick="clearDebugLog()">清除日志</button>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1440" height="2560"></canvas>
+        
+        <!-- 游戏UI -->
+        <div class="ui-overlay">
+            <!-- 生命值显示 -->
+            <div class="health-bar">
+                <div class="health-fill" id="healthFill"></div>
+                <span class="health-text" id="healthText">血量: 100/100</span>
+            </div>
+            
+            <!-- 信息面板 -->
+            <div class="info-panel">
+                <!-- 分数显示 -->
+                <div class="info-card score-display">
+                    <span class="label">分数:</span>
+                    <span id="scoreValue">0</span>
+                </div>
+                
+                <!-- 关卡显示 -->
+                <div class="info-card level-display">
+                    <span class="label">关卡:</span>
+                    <span id="levelValue">1</span>
+                </div>
+                
+                <!-- 时间显示 -->
+                <div class="info-card time-display">
+                    <span class="label">时间:</span>
+                    <span id="timeValue">0</span>
+                </div>
+                
+                <!-- 关卡进度显示 -->
+                <div class="info-card progress-display">
+                    <span class="label">进度:</span>
+                    <span id="progressValue">0%</span>
+                </div>
+                
+                <!-- 剩余怪物数量显示 -->
+                <div class="info-card monster-count-display">
+                    <span class="label">剩余怪物:</span>
+                    <span id="monsterCountValue">0</span>
+                </div>
+                
+                <!-- 关卡进度条 -->
+                <div class="info-card">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <!-- 音频控制 -->
+                <div class="audio-controls">
+                    <button id="audioToggle" class="audio-button" aria-label="切换音频开关" title="点击切换音频开关">🔊</button>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider" aria-label="音量控制" title="拖动调节音量">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏开始界面 -->
+        <div class="start-screen" id="startScreen">
+            <h1>末日垃圾场</h1>
+            <p>一个基于HTML5 Canvas的竖屏跑酷射击游戏</p>
+            <button id="startButton" aria-label="开始游戏" title="点击开始游戏">开始游戏</button>
+        </div>
+        
+        <!-- 游戏结束界面 -->
+        <div class="game-over-screen" id="gameOverScreen">
+            <h2>游戏结束</h2>
+            <p>最终分数: <span id="finalScore">0</span></p>
+            <p>到达关卡: <span id="finalLevel">1</span></p>
+            <button id="restartButton" aria-label="重新开始游戏" title="点击重新开始游戏">重新开始</button>
+        </div>
+        
+        <!-- 关卡完成界面 -->
+        <div class="level-complete-screen" id="levelCompleteScreen">
+            <h2>关卡完成！</h2>
+            <p>准备进入下一关...</p>
+            <button id="nextLevelButton" aria-label="进入下一关" title="点击进入下一关">下一关</button>
+        </div>
+    </div>
+    
+    <!-- 内联调试脚本 -->
+    <script>
+        // 调试日志系统
+        class DebugLogger {
+            constructor() {
+                this.logs = [];
+                this.maxLogs = 100;
+            }
+            
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                this.logs.push(logEntry);
+                console.log(logEntry);
+                
+                // 保持最近N条日志
+                if (this.logs.length > this.maxLogs) {
+                    this.logs.shift();
+                }
+                
+                this.updateDisplay();
+            }
+            
+            updateDisplay() {
+                const logElement = document.getElementById('debugLog');
+                if (logElement) {
+                    logElement.textContent = this.logs.join('\n');
+                    logElement.scrollTop = logElement.scrollHeight;
+                }
+            }
+            
+            clear() {
+                this.logs = [];
+                this.updateDisplay();
+            }
+        }
+        
+        // 全局调试日志器
+        const debugLogger = new DebugLogger();
+        
+        // 立即开始监控
+        debugLogger.log('=== 游戏调试V2启动 ===');
+        debugLogger.log('开始实时监控游戏初始化过程...');
+        
+        // 调试函数
+        function testButtonClick() {
+            debugLogger.log('=== 按钮点击测试 ===');
+            
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                debugLogger.log('找到开始按钮');
+                
+                // 检查按钮状态
+                const styles = getComputedStyle(startButton);
+                debugLogger.log(`按钮状态: display=${styles.display}, pointerEvents=${styles.pointerEvents}`);
+                
+                // 尝试点击
+                debugLogger.log('尝试点击按钮...');
+                try {
+                    startButton.click();
+                    debugLogger.log('✓ 按钮点击成功');
+                } catch (error) {
+                    debugLogger.log('✗ 按钮点击失败: ' + error.message);
+                }
+            } else {
+                debugLogger.log('✗ 开始按钮不存在');
+            }
+            
+            debugLogger.log('=== 按钮点击测试完成 ===');
+        }
+        
+        function checkGameState() {
+            debugLogger.log('=== 游戏状态检查 ===');
+            
+            // 检查游戏类是否已加载
+            const gameClasses = ['CONFIG', 'ImageLoader', 'AudioManager', 'UIManager', 'GameEngine'];
+            gameClasses.forEach(className => {
+                if (typeof window[className] !== 'undefined') {
+                    debugLogger.log(`✓ ${className} 已加载`);
+                } else {
+                    debugLogger.log(`✗ ${className} 未加载`);
+                }
+            });
+            
+            // 检查游戏引擎实例
+            if (typeof window.gameEngine !== 'undefined') {
+                debugLogger.log('✓ 游戏引擎实例存在');
+                debugLogger.log(`游戏状态: ${window.gameEngine.gameState}`);
+            } else {
+                debugLogger.log('✗ 游戏引擎实例不存在');
+            }
+            
+            debugLogger.log('=== 游戏状态检查完成 ===');
+        }
+        
+        function testUIManager() {
+            debugLogger.log('=== UI管理器测试 ===');
+            
+            if (typeof window.gameEngine !== 'undefined' && window.gameEngine.uiManager) {
+                const uiManager = window.gameEngine.uiManager;
+                debugLogger.log('✓ UI管理器存在');
+                
+                // 检查回调函数
+                debugLogger.log(`onGameStart回调: ${typeof uiManager.onGameStart}`);
+                debugLogger.log(`onGameRestart回调: ${typeof uiManager.onGameRestart}`);
+                
+                // 检查事件处理器
+                debugLogger.log(`startButtonHandler: ${typeof uiManager.startButtonHandler}`);
+                
+            } else {
+                debugLogger.log('✗ UI管理器不存在');
+            }
+            
+            debugLogger.log('=== UI管理器测试完成 ===');
+        }
+        
+        function testGameEngine() {
+            debugLogger.log('=== 游戏引擎测试 ===');
+            
+            if (typeof window.gameEngine !== 'undefined') {
+                const engine = window.gameEngine;
+                debugLogger.log('✓ 游戏引擎存在');
+                debugLogger.log(`游戏状态: ${engine.gameState}`);
+                debugLogger.log(`是否运行: ${engine.isRunning}`);
+                debugLogger.log(`画布: ${engine.canvas ? '存在' : '不存在'}`);
+                debugLogger.log(`UI管理器: ${engine.uiManager ? '存在' : '不存在'}`);
+                
+                // 测试开始游戏
+                debugLogger.log('尝试调用startGame()...');
+                try {
+                    engine.startGame();
+                    debugLogger.log('✓ startGame()调用成功');
+                } catch (error) {
+                    debugLogger.log('✗ startGame()调用失败: ' + error.message);
+                }
+                
+            } else {
+                debugLogger.log('✗ 游戏引擎不存在');
+            }
+            
+            debugLogger.log('=== 游戏引擎测试完成 ===');
+        }
+        
+        function createGameEngine() {
+            debugLogger.log('=== 手动创建游戏引擎 ===');
+            
+            try {
+                if (typeof GameEngine === 'undefined') {
+                    debugLogger.log('✗ GameEngine类未定义');
+                    return;
+                }
+                
+                debugLogger.log('✓ GameEngine类可用');
+                
+                if (window.gameEngine) {
+                    debugLogger.log('游戏引擎实例已存在，先销毁...');
+                    try {
+                        window.gameEngine.destroy();
+                        window.gameEngine = null;
+                        debugLogger.log('✓ 旧游戏引擎实例已销毁');
+                    } catch (error) {
+                        debugLogger.log('销毁旧实例时出错: ' + error.message);
+                    }
+                }
+                
+                debugLogger.log('创建新的游戏引擎实例...');
+                window.gameEngine = new GameEngine();
+                debugLogger.log('✓ 游戏引擎实例创建成功');
+                
+                // 检查创建后的状态
+                if (window.gameEngine) {
+                    debugLogger.log(`游戏状态: ${window.gameEngine.gameState}`);
+                    debugLogger.log(`UI管理器: ${window.gameEngine.uiManager ? '存在' : '不存在'}`);
+                    debugLogger.log(`画布: ${window.gameEngine.canvas ? '存在' : '不存在'}`);
+                }
+                
+            } catch (error) {
+                debugLogger.log('✗ 创建游戏引擎失败: ' + error.message);
+                debugLogger.log('错误堆栈: ' + error.stack);
+            }
+            
+            debugLogger.log('=== 手动创建游戏引擎完成 ===');
+        }
+        
+        function clearDebugLog() {
+            debugLogger.clear();
+            debugLogger.log('调试日志已清除');
+        }
+        
+        // 页面加载状态监控
+        document.addEventListener('DOMContentLoaded', () => {
+            debugLogger.log('✓ DOM加载完成');
+        });
+        
+        window.addEventListener('load', () => {
+            debugLogger.log('✓ 页面完全加载完成');
+            debugLogger.log('开始检查GameEngine类...');
+            
+            // 立即检查
+            if (typeof GameEngine !== 'undefined') {
+                debugLogger.log('✓ GameEngine类已加载');
+            } else {
+                debugLogger.log('✗ GameEngine类未加载');
+            }
+            
+            // 1秒后再次检查
+            setTimeout(() => {
+                debugLogger.log('=== 1秒后检查GameEngine类 ===');
+                if (typeof GameEngine !== 'undefined') {
+                    debugLogger.log('✓ GameEngine类已加载');
+                } else {
+                    debugLogger.log('✗ GameEngine类未加载');
+                }
+            }, 1000);
+            
+            // 3秒后尝试自动创建
+            setTimeout(() => {
+                debugLogger.log('=== 3秒后自动创建游戏引擎 ===');
+                
+                try {
+                    if (typeof GameEngine !== 'undefined') {
+                        debugLogger.log('✓ GameEngine类可用，开始创建实例...');
+                        
+                        // 创建游戏引擎实例
+                        if (!window.gameEngine) {
+                            debugLogger.log('创建游戏引擎实例...');
+                            window.gameEngine = new GameEngine();
+                            debugLogger.log('✓ 游戏引擎实例创建完成');
+                        } else {
+                            debugLogger.log('游戏引擎实例已存在');
+                        }
+                        
+                        // 检查游戏引擎状态
+                        if (window.gameEngine) {
+                            debugLogger.log(`游戏状态: ${window.gameEngine.gameState}`);
+                            debugLogger.log(`UI管理器: ${window.gameEngine.uiManager ? '存在' : '不存在'}`);
+                            debugLogger.log(`画布: ${window.gameEngine.canvas ? '存在' : '不存在'}`);
+                        }
+                        
+                    } else {
+                        debugLogger.log('✗ GameEngine类不可用，无法自动创建');
+                        debugLogger.log('请手动点击"手动创建游戏引擎"按钮');
+                    }
+                } catch (error) {
+                    debugLogger.log('✗ 自动创建游戏引擎失败: ' + error.message);
+                    debugLogger.log('错误堆栈: ' + error.stack);
+                }
+            }, 3000);
+        });
+        
+        // 错误捕获
+        window.addEventListener('error', (event) => {
+            debugLogger.log('全局错误: ' + event.error.message);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            debugLogger.log('Promise拒绝: ' + event.reason);
+        });
+        
+        // 立即执行的测试
+        debugLogger.log('调试系统初始化完成');
+    </script>
+    
+    <!-- 游戏脚本 -->
+    <script src="config.js" onload="debugLogger.log('✓ config.js 加载成功')" onerror="debugLogger.log('✗ config.js 加载失败！')"></script>
+    <script src="imageLoader.js" onload="debugLogger.log('✓ imageLoader.js 加载成功')" onerror="debugLogger.log('✗ imageLoader.js 加载失败！')"></script>
+    <script src="audioManager.js" onload="debugLogger.log('✓ audioManager.js 加载成功')" onerror="debugLogger.log('✗ audioManager.js 加载失败！')"></script>
+    <script src="camera.js" onload="debugLogger.log('✓ camera.js 加载成功')" onerror="debugLogger.log('✗ camera.js 加载失败！')"></script>
+    <script src="gameObjects.js" onload="debugLogger.log('✓ gameObjects.js 加载成功')" onerror="debugLogger.log('✗ gameObjects.js 加载失败！')"></script>
+    <script src="inputHandler.js" onload="debugLogger.log('✓ inputHandler.js 加载成功')" onerror="debugLogger.log('✗ inputHandler.js 加载失败！')"></script>
+    <script src="uiManager.js" onload="debugLogger.log('✓ uiManager.js 加载成功')" onerror="debugLogger.log('✗ uiManager.js 加载失败！')"></script>
+    <script src="gameEngine.js" onload="debugLogger.log('✓ gameEngine.js 加载成功')" onerror="debugLogger.log('✗ gameEngine.js 加载失败！')"></script>
+    
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="styles.css">
+</body>
+</html>
+

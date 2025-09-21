@@ -52,71 +52,62 @@ class GameEngine {
         this.canvas.width = CONFIG.GAME.CANVAS_WIDTH;
         this.canvas.height = CONFIG.GAME.CANVAS_HEIGHT;
         
-        // 加载图片资源（添加超时机制）
-        try {
-            const imageLoadPromise = this.imageLoader.loadAllImages();
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('图片加载超时')), 8000)
-            );
-            
-            await Promise.race([imageLoadPromise, timeoutPromise]);
-            this.backgroundManager = new BackgroundManager(this.imageLoader);
-            console.log('图片资源加载完成');
-        } catch (error) {
-            console.warn('图片加载超时或失败，继续初始化:', error.message);
-            // 即使图片加载失败，也继续初始化
-            this.backgroundManager = new BackgroundManager(this.imageLoader);
-        }
-        
-        // 初始化音频系统（添加超时机制）
-        try {
-            const audioInitPromise = this.audioManager.initialize();
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('音频初始化超时')), 5000)
-            );
-            
-            await Promise.race([audioInitPromise, timeoutPromise]);
-            if (CONFIG.DEBUG.ENABLED) {
-                console.log('音频系统初始化完成');
-            }
-        } catch (error) {
-            console.error('音频系统初始化失败:', error);
-            // 即使音频初始化失败，也继续初始化
-        }
-        
-        // 初始化游戏
+        // 先初始化游戏，让用户可以立即开始游戏
+        this.backgroundManager = new BackgroundManager(this.imageLoader);
         this.resetGame();
         
         // 设置UI回调（在UI管理器完全初始化后）
-        console.log('设置UI回调...');
         this.uiManager.setCallbacks({
             onGameStart: () => {
-                console.log('UI回调：游戏开始');
                 this.startGame();
             },
             onGameRestart: () => {
-                console.log('UI回调：游戏重启');
                 this.restartGame();
             },
             onNextLevel: () => {
-                console.log('UI回调：下一关');
                 this.nextLevel();
             },
             onAudioToggle: () => {
-                console.log('UI回调：音频切换');
                 this.toggleAudio();
             },
             onVolumeChange: (volume) => {
-                console.log('UI回调：音量改变', volume);
                 this.setVolume(volume);
             }
         });
         
-        console.log('显示开始界面...');
         this.uiManager.showStartScreen();
         
         // 初始化音频控制
         this.uiManager.initializeAudioControls(this.audioManager);
+        
+        // 异步加载资源，不阻塞游戏启动
+        this.loadResourcesAsync();
+    }
+    
+    async loadResourcesAsync() {
+        // 异步加载图片资源
+        try {
+            const imageLoadPromise = this.imageLoader.loadAllImages();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('图片加载超时')), 10000)
+            );
+            
+            await Promise.race([imageLoadPromise, timeoutPromise]);
+        } catch (error) {
+            // 图片加载失败，继续运行
+        }
+        
+        // 异步初始化音频系统
+        try {
+            const audioInitPromise = this.audioManager.initialize();
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('音频初始化超时')), 8000)
+            );
+            
+            await Promise.race([audioInitPromise, timeoutPromise]);
+        } catch (error) {
+            // 音频初始化失败，继续运行
+        }
     }
 
     resetGame() {
@@ -135,7 +126,6 @@ class GameEngine {
         
         // 创建玩家
         this.player = new Player(CONFIG.PLAYER.START_X, CONFIG.PLAYER.START_Y, this.imageLoader);
-        
         // 设置摄像机跟随玩家
         this.camera.setTarget(this.player);
         this.camera.reset();
@@ -181,7 +171,7 @@ class GameEngine {
     }
 
     restartGame() {
-        console.log('重新开始游戏...');
+        // 重新开始游戏
         
         // 先停止当前游戏循环
         this.isRunning = false;
@@ -205,7 +195,7 @@ class GameEngine {
         this.uiManager.showStartScreen();
         
         // 不直接启动游戏，让用户点击开始按钮
-        console.log('游戏已重置，等待用户点击开始按钮');
+        // 游戏已重置，等待用户点击开始按钮
     }
 
     nextLevel() {
@@ -315,7 +305,7 @@ class GameEngine {
         if (bullet) {
             this.bullets.push(bullet);
             if (CONFIG.DEBUG.ENABLED) {
-                console.log(`创建子弹: 位置(${bullet.x.toFixed(1)}, ${bullet.y.toFixed(1)}), 速度(${bullet.velocityX}, ${bullet.velocityY}), 总数: ${this.bullets.length}`);
+                // 子弹创建成功
             }
         }
     }
@@ -356,7 +346,7 @@ class GameEngine {
                 if (CONFIG.DEBUG.ENABLED && bullet.owner === 'player') {
                     // 调试：跟踪玩家子弹状态
                     if (Math.random() < 0.01) { // 1%概率输出调试信息
-                        console.log(`子弹状态: active=${bullet.active}, y=${bullet.y.toFixed(1)}, velocityY=${bullet.velocityY}, 总数: ${this.bullets.length}`);
+                        // 子弹状态更新
                     }
                 }
             }
@@ -365,7 +355,7 @@ class GameEngine {
         // 调试：显示子弹总数
         if (CONFIG.DEBUG.ENABLED && Math.random() < 0.01) {
             const activeBullets = this.bullets.filter(b => b.active).length;
-            console.log(`子弹总数: ${this.bullets.length}, 活跃子弹: ${activeBullets}`);
+            // 子弹清理完成
         }
     }
 
@@ -387,306 +377,102 @@ class GameEngine {
         const levelConfig = CONFIG.LEVELS[this.currentLevel - 1] || CONFIG.LEVELS[0];
         
         // 预生成足够多的怪物，覆盖整个关卡
-        const totalDistance = levelConfig.DURATION / 1000 * this.player.moveSpeed * 0.5; // 估算关卡总距离
-        const spawnPoints = Math.ceil(totalDistance / this.enemySpawnDistance);
+        // 根据关卡时长和玩家移动速度计算总距离
+        const totalDistance = (levelConfig.DURATION / 1000) * this.player.moveSpeed * 0.5; // 估算关卡总距离
+        const spawnDistance = this.enemySpawnDistance;
         
-        // 统计已生成的怪物数量
-        let barrelCount = 0;
-        let ufoCount = 0;
-        let giantCount = 0;
+        // 调试信息已隐藏
         
-        if (CONFIG.DEBUG.ENABLED) {
-            console.log(`预生成怪物: 关卡${this.currentLevel} (${levelConfig.DIFFICULTY}), 总距离=${totalDistance}, 生成点=${spawnPoints}, 玩家Y=${this.player.y}`);
-            console.log(`关卡配置: Barrel=${levelConfig.MAX_BARREL_MONSTERS}, UFO=${levelConfig.MAX_UFO_TURRETS}, Giant=${levelConfig.MAX_GIANT_MELEES}, 总计=${levelConfig.TOTAL_MONSTERS}`);
-            console.log(`关卡描述: ${levelConfig.DESCRIPTION}`);
-        }
-        
-        for (let i = 0; i < spawnPoints; i++) {
-            // 开局安全距离：前5秒不生成怪物
-            const safeTime = 5; // 5秒安全时间
-            const safeDistance = safeTime * this.player.moveSpeed * 0.5; // 5秒 * 390像素/秒 = 1950像素
-            const y = this.player.y - safeDistance - (i + 1) * this.enemySpawnDistance;
+        let totalGenerated = 0;
+        for (let distance = spawnDistance; distance < totalDistance; distance += spawnDistance) {
+            const progress = distance / totalDistance;
+            const row = Math.floor(distance / spawnDistance);
             
-            // 根据关卡进度调整生成密度（前期少，中段开始增多，后期最多）
-            const progressRatio = i / spawnPoints; // 0到1的进度比例
-            // 使用S型曲线：前期缓慢增长，中段快速增长，后期高密度
-            let densityMultiplier;
-            if (progressRatio < 0.2) {
-                // 前期20%：缓慢增长
-                densityMultiplier = 0.3 + (progressRatio / 0.2) * 0.4; // 0.3到0.7
-            } else if (progressRatio < 0.5) {
-                // 中段30%：快速增长
-                const midProgress = (progressRatio - 0.2) / 0.3;
-                densityMultiplier = 0.7 + midProgress * 0.8; // 0.7到1.5
-            } else if (progressRatio < 0.8) {
-                // 后期前段30%：高密度
-                const lateProgress = (progressRatio - 0.5) / 0.3;
-                densityMultiplier = 1.5 + lateProgress * 0.8; // 1.5到2.3
+            // 根据进度确定每行的最大敌人数量
+            let maxEnemiesPerRow = 3; // 默认最多3个
+            
+            // 检查这一行是否包含巨型近战怪
+            const hasGiantInCurrentRow = Math.random() < 0.3; // 30%概率有巨型近战怪
+            if (hasGiantInCurrentRow) {
+                maxEnemiesPerRow = 2; // 有巨型近战怪时最多2个
+            }
+            
+            // 计算基础敌人数量
+            let baseEnemyCount = Math.floor(Math.random() * maxEnemiesPerRow) + 1;
+            let enemyCount = Math.min(baseEnemyCount, maxEnemiesPerRow);
+            
+            // 根据进度调整密度
+            let densityMultiplier = 1.0;
+            if (progress < 0.2) {
+                densityMultiplier = 0.3 + (progress / 0.2) * 0.4; // 0.3-0.7
+            } else if (progress < 0.5) {
+                densityMultiplier = 0.7 + ((progress - 0.2) / 0.3) * 0.8; // 0.7-1.5
+            } else if (progress < 0.8) {
+                densityMultiplier = 1.5 + ((progress - 0.5) / 0.3) * 0.8; // 1.5-2.3
             } else {
-                // 最后20%：最高密度
-                const finalProgress = (progressRatio - 0.8) / 0.2;
-                densityMultiplier = 2.3 + finalProgress * 0.7; // 2.3到3.0
+                densityMultiplier = 2.3 + ((progress - 0.8) / 0.2) * 0.7; // 2.3-3.0
             }
             
-            // 根据关卡进度和总怪物数量计算应该生成的怪物数量
-            const totalMonsters = levelConfig.TOTAL_MONSTERS;
-            const expectedMonstersAtThisPoint = Math.floor((i / spawnPoints) * totalMonsters);
-            const monstersGeneratedSoFar = barrelCount + ufoCount + giantCount;
-            const remainingMonsters = totalMonsters - monstersGeneratedSoFar;
+            enemyCount = Math.floor(enemyCount * densityMultiplier);
+            enemyCount = Math.min(enemyCount, maxEnemiesPerRow);
             
-            // 如果已经生成了足够的怪物，跳过这个生成点
-            if (remainingMonsters <= 0) {
-                if (CONFIG.DEBUG.ENABLED && i < 5) {
-                    console.log(`跳过生成点${i}: 剩余怪物数量为0`);
+            // 生成敌人类型
+            const availableTypes = [];
+            if (hasGiantInCurrentRow) {
+                availableTypes.push('GiantMelee');
+                if (enemyCount > 1) {
+                    availableTypes.push('BarrelMonster', 'UFOTurret');
                 }
-                continue; // 跳过这个生成点，继续下一个
-            }
-            
-            // 如果当前进度应该生成的怪物数量已经达到，跳过这个生成点
-            // 但允许一定的容错范围，避免怪物生成过少
-            if (monstersGeneratedSoFar >= expectedMonstersAtThisPoint + 2) {
-                if (CONFIG.DEBUG.ENABLED && i < 5) {
-                    console.log(`跳过生成点${i}: 已生成${monstersGeneratedSoFar} >= 预期${expectedMonstersAtThisPoint} + 2`);
-                }
-                continue; // 跳过这个生成点，继续下一个
-            }
-            
-            // 检查当前行是否已有巨型怪
-            const hasGiantInRow = this.preSpawnedEnemies.some(existing => 
-                Math.abs(existing.y - y) < 50 && existing.constructor.name === 'GiantMelee'
-            );
-            
-            // 根据新规则确定最大怪物数量
-            const maxEnemiesPerRow = hasGiantInRow ? 2 : 3;
-            
-            // 根据关卡进度和剩余数量调整生成策略
-            let baseEnemyCount;
-            if (remainingMonsters <= 3) {
-                baseEnemyCount = 1; // 剩余怪物很少时，每次生成1个
-            } else if (remainingMonsters <= 8) {
-                baseEnemyCount = Math.random() < 0.6 ? 1 : 2; // 60%概率生成1个，40%概率生成2个
             } else {
-                // 怪物数量充足时，根据进度调整密度
-                const maxCount = Math.min(maxEnemiesPerRow, Math.floor(remainingMonsters / 5));
-                baseEnemyCount = Math.floor(Math.random() * maxCount) + 1; // 1到maxCount个
+                availableTypes.push('BarrelMonster', 'UFOTurret');
             }
             
-            // 应用密度倍数，但不超过行最大数量
-            let enemyCount = Math.floor(baseEnemyCount * densityMultiplier);
-            enemyCount = Math.max(1, Math.min(enemyCount, Math.min(maxEnemiesPerRow, remainingMonsters)));
-            
-            // 为这个生成点生成怪物，避免碰撞
-            const playAreaLeft = (CONFIG.GAME.CANVAS_WIDTH - 720) / 2; // 360
-            const playAreaRight = playAreaLeft + 720; // 1080
-            const spawnWidth = 720 - 60; // 减少边距，增加可用宽度 (660px)
-            const spawnLeft = playAreaLeft + 30; // 减少左边距 (390px)
-            
-            for (let j = 0; j < enemyCount; j++) {
-                // 尝试找到不碰撞的位置
-                let attempts = 0;
-                let validPosition = false;
-                let x, enemy;
+            for (let i = 0; i < enemyCount; i++) {
+                const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
+                const x = CONFIG.GAME.CANVAS_WIDTH / 2 + (Math.random() - 0.5) * 400;
+                const y = -distance + Math.random() * 100;
                 
-                while (!validPosition && attempts < 50) {
-                    // 使用更均匀的分布，而不是完全随机
-                    if (attempts < 10) {
-                        // 前10次尝试使用均匀分布
-                        x = spawnLeft + (j * spawnWidth / enemyCount) + Math.random() * (spawnWidth / enemyCount);
-                    } else {
-                        // 后续尝试使用随机分布
-                        x = spawnLeft + Math.random() * spawnWidth;
-                    }
-                    
-                    // 根据关卡配置智能选择怪物类型
-                    let enemyType = null;
-                    
-                    // 检查当前行已有的怪物数量和类型
-                    const currentRowEnemies = this.preSpawnedEnemies.filter(existing => 
-                        Math.abs(existing.y - y) < 50
-                    );
-                    
-                    const hasGiantInCurrentRow = currentRowEnemies.some(existing => 
-                        existing.constructor.name === 'GiantMelee'
-                    );
-                    
-                    const currentRowEnemyCount = currentRowEnemies.length;
-                    
-                    // 根据关卡配置和剩余数量选择怪物类型
-                    const availableTypes = [];
-                    
-                    // 油桶怪和飞碟怪：如果当前行没有巨型怪且怪物数量未达到上限，可以生成
-                    if (barrelCount < levelConfig.MAX_BARREL_MONSTERS && !hasGiantInCurrentRow) {
-                        availableTypes.push('barrel');
-                    }
-                    if (ufoCount < levelConfig.MAX_UFO_TURRETS && !hasGiantInCurrentRow) {
-                        availableTypes.push('ufo');
-                    }
-                    
-                    // 巨型怪：只有在当前行怪物数量少于2个时才能生成
-                    if (giantCount < levelConfig.MAX_GIANT_MELEES && currentRowEnemyCount < 2) {
-                        availableTypes.push('giant');
-                    }
-                    
-                    // 如果当前行已有巨型怪，只能生成油桶怪或飞碟怪，且总数不超过2个
-                    if (hasGiantInCurrentRow && currentRowEnemyCount < 2) {
-                        if (barrelCount < levelConfig.MAX_BARREL_MONSTERS) {
-                            availableTypes.push('barrel');
-                        }
-                        if (ufoCount < levelConfig.MAX_UFO_TURRETS) {
-                            availableTypes.push('ufo');
-                        }
-                    }
-                    
-            // 调试：显示可用类型
-            if (CONFIG.DEBUG.ENABLED && i < 5) {
-                console.log(`生成点${i}: 可用类型=${availableTypes.join(',')}, 当前计数=(Barrel:${barrelCount}, UFO:${ufoCount}, Giant:${giantCount})`);
-                console.log(`生成点${i}: 预期怪物=${expectedMonstersAtThisPoint}, 已生成=${monstersGeneratedSoFar}, 剩余=${remainingMonsters}`);
-            }
-                    
-                    if (availableTypes.length === 0) {
-                        if (CONFIG.DEBUG.ENABLED) {
-                            console.log(`跳过生成点${i}: 所有怪物类型已达上限 (Barrel:${barrelCount}/${levelConfig.MAX_BARREL_MONSTERS}, UFO:${ufoCount}/${levelConfig.MAX_UFO_TURRETS}, Giant:${giantCount}/${levelConfig.MAX_GIANT_MELEES})`);
-                        }
-                        continue; // 没有可用的怪物类型，跳过
-                    }
-                    
-                    // 根据关卡进度调整怪物类型权重
-                    let typeWeights = {};
-                    if (availableTypes.includes('barrel')) {
-                        typeWeights.barrel = 0.5; // 基础权重，油桶怪最常见
-                    }
-                    if (availableTypes.includes('ufo')) {
-                        typeWeights.ufo = 0.3; // 基础权重，UFO中等
-                    }
-                    if (availableTypes.includes('giant')) {
-                        typeWeights.giant = 0.2; // 基础权重，巨型怪最少
-                    }
-                    
-                    // 根据关卡进度和生成进度调整权重
-                    const levelProgress = this.currentLevel / CONFIG.LEVELS.length;
-                    const spawnProgress = i / spawnPoints; // 当前生成点的进度
-                    
-                    // 后期关卡和后期生成点增加巨型怪物概率
-                    if (typeWeights.giant) {
-                        typeWeights.giant += levelProgress * 0.2 + spawnProgress * 0.1; // 关卡进度和生成进度都影响
-                    }
-                    
-                    // 根据剩余数量调整权重（剩余少的类型权重降低）
-                    const remainingBarrels = levelConfig.MAX_BARREL_MONSTERS - barrelCount;
-                    const remainingUFOs = levelConfig.MAX_UFO_TURRETS - ufoCount;
-                    const remainingGiants = levelConfig.MAX_GIANT_MELEES - giantCount;
-                    const totalRemaining = remainingBarrels + remainingUFOs + remainingGiants;
-                    
-                    if (typeWeights.barrel && remainingBarrels < totalRemaining * 0.1) {
-                        typeWeights.barrel *= 0.5; // 剩余很少时降低权重
-                    }
-                    if (typeWeights.ufo && remainingUFOs < totalRemaining * 0.1) {
-                        typeWeights.ufo *= 0.5;
-                    }
-                    if (typeWeights.giant && remainingGiants < totalRemaining * 0.1) {
-                        typeWeights.giant *= 0.5;
-                    }
-                    
-                    // 根据权重随机选择怪物类型
-                    const random = Math.random();
-                    let cumulativeWeight = 0;
-                    for (const [type, weight] of Object.entries(typeWeights)) {
-                        cumulativeWeight += weight;
-                        if (random <= cumulativeWeight) {
-                            enemyType = type;
+                let enemy;
+                try {
+                    switch (type) {
+                        case 'BarrelMonster':
+                            enemy = new BarrelMonster(x, y, this.imageLoader);
                             break;
-                        }
+                        case 'UFOTurret':
+                            enemy = new UFOTurret(x, y, this.imageLoader);
+                            break;
+                        case 'GiantMelee':
+                            enemy = new GiantMelee(x, y, this.imageLoader);
+                            break;
                     }
                     
-                    // 创建选定的怪物
-                    if (enemyType === 'barrel') {
-                        enemy = new BarrelMonster(x, y, this.imageLoader);
-                        barrelCount++;
-                    } else if (enemyType === 'ufo') {
-                        enemy = new UFOTurret(x, y, this.imageLoader);
-                        ufoCount++;
-                    } else if (enemyType === 'giant') {
-                        enemy = new GiantMelee(x, y, this.imageLoader);
-                        giantCount++;
-                    } else {
-                        continue; // 没有选择到有效类型，跳过
+                    if (enemy) {
+                        enemy.active = false; // 确保敌人初始状态为未激活
+                        this.preSpawnedEnemies.push(enemy);
+                        totalGenerated++;
                     }
-                    
-                    // 检查与同批次其他怪物的碰撞
-                    validPosition = true;
-                    for (let k = 0; k < this.preSpawnedEnemies.length; k++) {
-                        const existingEnemy = this.preSpawnedEnemies[k];
-                        // 检查同一水平线附近的怪物（允许一定Y轴误差）
-                        if (Math.abs(existingEnemy.y - y) < 50) { 
-                            const distance = Math.abs(x - existingEnemy.x);
-                            
-                            // 智能间距计算：确保怪物边缘之间有足够间距
-                            let minDistance;
-                            const maxWidth = Math.max(enemy.width, existingEnemy.width);
-                            
-                            // 计算两个怪物中心点之间的最小距离
-                            // 中心距离 = (怪物1宽度 + 怪物2宽度) / 2 + 边缘间距
-                            // 设置基础间距为50像素
-                            minDistance = (enemy.width + existingEnemy.width) / 2 + 50;
-                            
-                            if (distance < minDistance) {
-                                validPosition = false;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    attempts++;
-                }
-                
-                if (validPosition) {
-                    // 预生成的怪物初始状态为未激活
-                    enemy.active = false;
-                    this.preSpawnedEnemies.push(enemy);
-                    if (CONFIG.DEBUG.ENABLED && Math.random() < 0.1) { // 10%概率输出
-                        console.log(`生成怪物: ${enemy.constructor.name} at (${x.toFixed(1)}, ${y.toFixed(1)})`);
-                    }
-                } else {
-                    if (CONFIG.DEBUG.ENABLED) {
-                        console.log(`怪物生成失败: 尝试${attempts}次后仍无法找到合适位置`);
-                    }
+                } catch (error) {
+                    console.warn(`创建敌人失败: ${type}`, error);
                 }
             }
+            
+            // 调试信息已隐藏
         }
         
-        // 输出生成统计信息
-        if (CONFIG.DEBUG.ENABLED) {
-            console.log(`怪物生成完成: Barrel=${barrelCount}/${levelConfig.MAX_BARREL_MONSTERS}, UFO=${ufoCount}/${levelConfig.MAX_UFO_TURRETS}, Giant=${giantCount}/${levelConfig.MAX_GIANT_MELEES}`);
-            console.log(`总生成怪物数量: ${this.preSpawnedEnemies.length}`);
-            
-            // 调试：显示前几个怪物的位置
-            if (this.preSpawnedEnemies.length > 0) {
-                console.log('前5个怪物位置:');
-                for (let i = 0; i < Math.min(5, this.preSpawnedEnemies.length); i++) {
-                    const enemy = this.preSpawnedEnemies[i];
-                    console.log(`怪物${i+1}: ${enemy.constructor.name} at (${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)})`);
-                }
-            } else {
-                console.log('❌ 没有生成任何怪物！');
-            }
-        }
+        // 预生成敌人完成
     }
 
     spawnEnemies() {
         // 检查预生成的怪物是否需要激活
         this.preSpawnedEnemies.forEach(enemy => {
             if (!enemy.active) {
-                // 当玩家接近怪物时激活（玩家Y坐标 - 怪物Y坐标 < 1.5倍屏幕高度）
-                const distanceToPlayer = this.player.y - enemy.y;
+                // 当玩家接近怪物时激活（怪物Y坐标 - 玩家Y坐标 < 1.5倍屏幕高度）
+                const distanceToPlayer = enemy.y - this.player.y;
                 if (distanceToPlayer < CONFIG.GAME.CANVAS_HEIGHT * 1.5) {
                     // 怪物进入视野范围，激活它
                     enemy.active = true;
                     this.enemies.push(enemy);
-                    if (CONFIG.DEBUG.ENABLED) {
-                        console.log(`激活怪物: ${enemy.constructor.name} at (${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)}), 距离玩家: ${distanceToPlayer.toFixed(1)}`);
-                        console.log(`玩家位置: (${this.player.x.toFixed(1)}, ${this.player.y.toFixed(1)})`);
-                        console.log(`摄像机位置: (${this.camera.x.toFixed(1)}, ${this.camera.y.toFixed(1)})`);
-                    }
+                    // 怪物激活成功
                 }
             }
         });
@@ -763,7 +549,7 @@ class GameEngine {
                 if (bullet.checkCollision(enemy)) {
                     const isDead = enemy.takeDamage(bullet.damage);
                     if (CONFIG.DEBUG.ENABLED) {
-                        console.log(`子弹击中敌人: 位置(${bullet.x.toFixed(1)}, ${bullet.y.toFixed(1)}), 敌人: ${enemy.constructor.name}, 剩余子弹: ${this.bullets.length - 1}`);
+                        // 子弹击中敌人
                     }
                     bullet.destroy();
                     
@@ -952,7 +738,7 @@ class GameEngine {
                 } else if (CONFIG.DEBUG.ENABLED) {
                     // 调试：显示不在视野内的怪物信息
                     const screenPos = this.camera.worldToScreen(enemy.x, enemy.y);
-                    console.log(`怪物不在视野内: 世界坐标(${enemy.x.toFixed(1)}, ${enemy.y.toFixed(1)}) -> 屏幕坐标(${screenPos.x.toFixed(1)}, ${screenPos.y.toFixed(1)})`);
+                    // 怪物不在视野内
                 }
                 
                 // 临时调试：强制绘制所有激活的怪物（红色边框）
@@ -1135,25 +921,27 @@ class GameEngine {
 }
 
 // 游戏初始化
-let gameEngine = null;
+if (typeof gameEngine === 'undefined') {
+    var gameEngine = null;
+}
 
 // 页面加载完成后初始化游戏
 document.addEventListener('DOMContentLoaded', () => {
     // 如果已经存在游戏引擎实例，先销毁
     if (gameEngine) {
-        console.log('销毁现有游戏引擎实例...');
+        // 销毁现有游戏引擎实例
         gameEngine.destroy();
         gameEngine = null;
     }
     
-    console.log('初始化新的游戏引擎...');
+    // 初始化新的游戏引擎
     gameEngine = new GameEngine();
 });
 
 // 页面卸载时清理资源
 window.addEventListener('beforeunload', () => {
     if (gameEngine) {
-        console.log('页面卸载，清理游戏资源...');
+        // 页面卸载，清理游戏资源
         gameEngine.destroy();
         gameEngine = null;
     }
@@ -1162,7 +950,7 @@ window.addEventListener('beforeunload', () => {
 // 页面重新加载时清理资源
 window.addEventListener('unload', () => {
     if (gameEngine) {
-        console.log('页面重新加载，清理游戏资源...');
+        // 页面重新加载，清理游戏资源
         gameEngine.destroy();
         gameEngine = null;
     }

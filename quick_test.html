@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #0f0f23;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .test-section {
+            background-color: #1a1a2e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #4ecdc4;
+        }
+        
+        button {
+            background: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        
+        button:hover {
+            background: #44a08d;
+        }
+        
+        .log {
+            background-color: #0f0f23;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #4ecdc4;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-section">
+        <h2>快速测试修复后的游戏</h2>
+        <button onclick="testGame()">测试游戏</button>
+        <button onclick="clearLog()">清空日志</button>
+        <div class="log" id="testLog">等待测试...</div>
+    </div>
+
+    <script>
+        function log(message) {
+            const log = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            log.textContent += `\n[${timestamp}] ${message}`;
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('testLog').textContent = '日志已清空...';
+        }
+        
+        function testGame() {
+            log('开始测试游戏...');
+            
+            // 检查基本对象
+            log(`CONFIG存在: ${typeof CONFIG !== 'undefined'}`);
+            log(`GameEngine类存在: ${typeof GameEngine !== 'undefined'}`);
+            log(`gameEngine实例存在: ${typeof gameEngine !== 'undefined'}`);
+            
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                log(`游戏状态: ${gameEngine.gameState}`);
+                log(`游戏运行中: ${gameEngine.isRunning}`);
+            }
+            
+            // 检查UI元素
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                log('开始按钮存在');
+                log(`按钮可见: ${startButton.offsetParent !== null}`);
+            } else {
+                log('开始按钮不存在');
+            }
+        }
+        
+        // 错误捕获
+        window.addEventListener('error', function(event) {
+            log(`错误: ${event.error ? event.error.message : event.message}`);
+        });
+        
+        window.addEventListener('unhandledrejection', function(event) {
+            log(`Promise错误: ${event.reason}`);
+        });
+        
+        log('快速测试页面已加载');
+    </script>
+    
+    <script src="config.js" onload="log('config.js 加载成功')" onerror="log('config.js 加载失败')"></script>
+    <script src="imageLoader.js" onload="log('imageLoader.js 加载成功')" onerror="log('imageLoader.js 加载失败')"></script>
+    <script src="audioManager.js" onload="log('audioManager.js 加载成功')" onerror="log('audioManager.js 加载失败')"></script>
+    <script src="camera.js" onload="log('camera.js 加载成功')" onerror="log('camera.js 加载失败')"></script>
+    <script src="gameObjects.js" onload="log('gameObjects.js 加载成功')" onerror="log('gameObjects.js 加载失败')"></script>
+    <script src="inputHandler.js" onload="log('inputHandler.js 加载成功')" onerror="log('inputHandler.js 加载失败')"></script>
+    <script src="uiManager.js" onload="log('uiManager.js 加载成功')" onerror="log('uiManager.js 加载失败')"></script>
+    <script src="gameEngine.js" onload="log('gameEngine.js 加载成功')" onerror="log('gameEngine.js 加载失败')"></script>
+</body>
+</html>

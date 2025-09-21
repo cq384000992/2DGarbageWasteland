@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>末日垃圾场游戏 - 调试版</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .debug-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 300px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 1000;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .debug-panel h3 {
+            margin: 0 0 10px 0;
+            color: #4ecdc4;
+        }
+        
+        .debug-log {
+            margin: 5px 0;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .debug-log.success {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+        
+        .debug-log.error {
+            background-color: rgba(244, 67, 54, 0.3);
+        }
+        
+        .debug-log.info {
+            background-color: rgba(33, 150, 243, 0.3);
+        }
+        
+        .debug-button {
+            background: #4ecdc4;
+            color: #0f0f23;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 2px;
+            font-size: 11px;
+        }
+        
+        .debug-button:hover {
+            background: #44a08d;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="1440" height="2560"></canvas>
+        
+        <!-- 游戏UI -->
+        <div class="ui-overlay">
+            <!-- 生命值显示 -->
+            <div class="health-bar">
+                <div class="health-fill" id="healthFill"></div>
+                <span class="health-text" id="healthText">血量: 100/100</span>
+            </div>
+            
+            <!-- 信息面板 -->
+            <div class="info-panel">
+                <!-- 分数显示 -->
+                <div class="info-card score-display">
+                    <span class="label">分数:</span>
+                    <span id="scoreValue">0</span>
+                </div>
+                
+                <!-- 关卡显示 -->
+                <div class="info-card level-display">
+                    <span class="label">关卡:</span>
+                    <span id="levelValue">1</span>
+                </div>
+                
+                <!-- 时间显示 -->
+                <div class="info-card time-display">
+                    <span class="label">时间:</span>
+                    <span id="timeValue">0</span>
+                </div>
+                
+                <!-- 关卡进度显示 -->
+                <div class="info-card progress-display">
+                    <span class="label">进度:</span>
+                    <span id="progressValue">0%</span>
+                </div>
+                
+                <!-- 剩余怪物数量显示 -->
+                <div class="info-card monster-count-display">
+                    <span class="label">剩余怪物:</span>
+                    <span id="monsterCountValue">0</span>
+                </div>
+                
+                <!-- 关卡进度条 -->
+                <div class="info-card">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                
+                <!-- 音频控制 -->
+                <div class="audio-controls">
+                    <button id="audioToggle" class="audio-button" aria-label="切换音频开关" title="点击切换音频开关">🔊</button>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="50" class="volume-slider" aria-label="音量控制" title="拖动调节音量">
+                </div>
+            </div>
+        </div>
+        
+        <!-- 游戏开始界面 -->
+        <div class="start-screen" id="startScreen">
+            <h1>末日垃圾场</h1>
+            <p>一个基于HTML5 Canvas的竖屏跑酷射击游戏</p>
+            <button id="startButton" aria-label="开始游戏" title="点击开始游戏">开始游戏</button>
+        </div>
+        
+        <!-- 游戏结束界面 -->
+        <div class="game-over-screen" id="gameOverScreen" style="display: none;">
+            <h2>游戏结束</h2>
+            <p>最终分数: <span id="finalScore">0</span></p>
+            <p>到达关卡: <span id="finalLevel">1</span></p>
+            <button id="restartButton" aria-label="重新开始游戏" title="点击重新开始游戏">重新开始</button>
+        </div>
+        
+        <!-- 关卡完成界面 -->
+        <div class="level-complete-screen" id="levelCompleteScreen" style="display: none;">
+            <h2>关卡完成！</h2>
+            <p>准备进入下一关...</p>
+            <button id="nextLevelButton" aria-label="进入下一关" title="点击进入下一关">下一关</button>
+        </div>
+    </div>
+    
+    <!-- 调试面板 -->
+    <div class="debug-panel">
+        <h3>调试信息</h3>
+        <div id="debugLog"></div>
+        <button class="debug-button" onclick="checkGameState()">检查游戏状态</button>
+        <button class="debug-button" onclick="checkStartButton()">检查开始按钮</button>
+        <button class="debug-button" onclick="clearDebugLog()">清空日志</button>
+    </div>
+    
+    <!-- 游戏脚本 -->
+    <script>
+        // 调试日志函数
+        function debugLog(message, type = 'info') {
+            const log = document.getElementById('debugLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `debug-log ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            log.appendChild(logEntry);
+            log.scrollTop = log.scrollHeight;
+            console.log(`[DEBUG] ${message}`);
+        }
+        
+        function clearDebugLog() {
+            document.getElementById('debugLog').innerHTML = '';
+        }
+        
+        function checkGameState() {
+            debugLog('=== 游戏状态检查 ===', 'info');
+            debugLog(`GameEngine类存在: ${typeof GameEngine !== 'undefined'}`, typeof GameEngine !== 'undefined' ? 'success' : 'error');
+            debugLog(`gameEngine实例存在: ${typeof gameEngine !== 'undefined'}`, typeof gameEngine !== 'undefined' ? 'success' : 'error');
+            if (typeof gameEngine !== 'undefined' && gameEngine) {
+                debugLog(`游戏状态: ${gameEngine.gameState}`, 'info');
+                debugLog(`游戏运行中: ${gameEngine.isRunning}`, 'info');
+            }
+        }
+        
+        function checkStartButton() {
+            debugLog('=== 开始按钮检查 ===', 'info');
+            const startButton = document.getElementById('startButton');
+            if (startButton) {
+                debugLog('开始按钮元素存在', 'success');
+                debugLog(`按钮是否可见: ${startButton.offsetParent !== null}`, 'info');
+                debugLog(`按钮是否被禁用: ${startButton.disabled}`, 'info');
+                debugLog(`按钮onclick属性: ${startButton.onclick !== null}`, 'info');
+                
+                // 检查事件监听器
+                const hasClickHandler = startButton.onclick !== null;
+                debugLog(`按钮有点击处理器: ${hasClickHandler}`, hasClickHandler ? 'success' : 'error');
+                
+                // 尝试手动触发点击
+                debugLog('尝试手动触发按钮点击...', 'info');
+                startButton.click();
+            } else {
+                debugLog('开始按钮元素不存在', 'error');
+            }
+        }
+        
+        // 错误捕获
+        window.addEventListener('error', function(event) {
+            debugLog(`页面错误: ${event.error ? event.error.message : event.message}`, 'error');
+            debugLog(`错误文件: ${event.filename}:${event.lineno}:${event.colno}`, 'error');
+        });
+        
+        window.addEventListener('unhandledrejection', function(event) {
+            debugLog(`Promise拒绝: ${event.reason}`, 'error');
+        });
+        
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            debugLog('页面完全加载完成', 'success');
+            setTimeout(() => {
+                checkGameState();
+                checkStartButton();
+            }, 1000);
+        });
+        
+        debugLog('调试页面已加载', 'info');
+    </script>
+    
+    <script src="config.js" onload="debugLog('config.js 加载成功', 'success')" onerror="debugLog('config.js 加载失败', 'error')"></script>
+    <script src="imageLoader.js" onload="debugLog('imageLoader.js 加载成功', 'success')" onerror="debugLog('imageLoader.js 加载失败', 'error')"></script>
+    <script src="audioManager.js" onload="debugLog('audioManager.js 加载成功', 'success')" onerror="debugLog('audioManager.js 加载失败', 'error')"></script>
+    <script src="camera.js" onload="debugLog('camera.js 加载成功', 'success')" onerror="debugLog('camera.js 加载失败', 'error')"></script>
+    <script src="gameObjects.js" onload="debugLog('gameObjects.js 加载成功', 'success')" onerror="debugLog('gameObjects.js 加载失败', 'error')"></script>
+    <script src="inputHandler.js" onload="debugLog('inputHandler.js 加载成功', 'success')" onerror="debugLog('inputHandler.js 加载失败', 'error')"></script>
+    <script src="uiManager.js" onload="debugLog('uiManager.js 加载成功', 'success')" onerror="debugLog('uiManager.js 加载失败', 'error')"></script>
+    <script src="gameEngine.js" onload="debugLog('gameEngine.js 加载成功', 'success')" onerror="debugLog('gameEngine.js 加载失败', 'error')"></script>
+</body>
+</html>

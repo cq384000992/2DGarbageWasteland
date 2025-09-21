@@ -205,7 +205,7 @@ const CONFIG = {
 
     // 调试设置
     DEBUG: {
-        ENABLED: true,
+        ENABLED: false,
         SHOW_FPS: false,
         SHOW_COLLISION_BOXES: false,
         SHOW_SPAWN_POINTS: false
